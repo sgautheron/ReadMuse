@@ -1,7 +1,7 @@
 import React from "react";
 import Livres from "../components/Livres";
 import { Box, Typography } from "@mui/material";
-import "../styles/Exploration.css";
+import "../styles/Livres.css";
 
 
 const Exploration = () => {

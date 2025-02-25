@@ -5,49 +5,50 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-  }
-  
-  /* 📚 Conteneur des rangées */
-  .shelf-container {
+}
+
+/* 📚 Conteneur des rangées */
+.shelf-container {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 50px; /* ✅ Ajoute de l'espace sous chaque étagère */
+}
+
+/* 📖 Rangée de livres */
+.book-row {
+    display: flex;
     justify-content: center;
     gap: 20px;
-    position: relative;
     width: 100%;
-    max-width: 80vw; /* ✅ Pour éviter que les livres s'étalent trop */
-    margin-bottom: 50px;
-  }
-  
-  /* 📖 Livres */
-  .book-item {
-    width: 130px; /* ✅ Taille fixe pour uniformiser */
+}
+
+/* 📖 Livres */
+.book-item {
+    width: 140px; /* ✅ Taille uniforme */
     text-align: center;
     position: relative;
     transition: transform 0.2s ease-in-out;
-  }
-  
-  /* 🏗️ Effet au survol */
-  .book-item:hover {
-    transform: scale(1.05);
-  }
-  
-  /* 📘 Images des livres */
-  .book-cover {
+    margin-bottom: -10px; /* 🔥 Ajustement pour coller à l'étagère */
+}
+
+/* 📘 Images des livres */
+.book-cover {
     width: 100%;
-    height: auto;
-    border-radius: 5px;
-    box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2);
+    height: 200px; /* ✅ Hauteur uniforme */
+    object-fit: cover; /* ✅ Ajuste sans déformation */
+    border-radius: 3px;
+    box-shadow: 6px 10px 15px rgba(0, 0, 0, 0.4);
     cursor: pointer;
-  }
-  
-  /* ✨ Étageres qui s'ajustent automatiquement */
-  .shelf {
-    height: 10px;
-    background-color: #d2b48c; /* Marron clair */
-    border-radius: 5px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
-    margin-top: -5px;
-    width: 100%;
-  }
-  
+}
+
+/* ✨ Étageres bien alignées avec les livres */
+.shelf {
+    height: 20px;
+    background: linear-gradient(to bottom, #c8a97e 50%, #8b6f47 90%);
+    border-radius: 15px;
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.5);
+    margin-top: 3px; /* 🔥 Ajustement pour que le livre repose dessus */
+    width: 100%; /* ✅ Prend toute la largeur */
+    max-width: 150vw; /* ✅ Pour s'ajuster à l'écran */
+}
