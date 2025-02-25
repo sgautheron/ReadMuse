@@ -1,13 +1,18 @@
 import React from "react";
-import Livres from "../components/Livres"; // Import du composant qui affiche les livres
+import Livres from "../components/Livres";
+import { Box, Typography } from "@mui/material";
+import "../styles/Exploration.css";
+
 
 const Exploration = () => {
   return (
-    <div>
-      <h1>ReadMuse</h1>
-      <h2>📖 Vos recommandations</h2>
-      <Livres /> {/* Affichage des livres ici */}
-    </div>
+    <Box sx={{ padding: 4, backgroundColor: "#f5f0e6", minHeight: "100vh" }}>
+      <Typography variant="h4" textAlign="center" fontWeight="bold" mb={4}>
+        Explorer les Livres
+      </Typography>
+
+      <Livres />
+    </Box>
   );
 };
 

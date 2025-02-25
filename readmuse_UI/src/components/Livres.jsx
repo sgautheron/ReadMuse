@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { fetchLivres } from "../api/livres"; // Import de l'API
+import { fetchLivres } from "../api/livres";
+import { Box } from "@mui/material";
+import { Link } from "react-router-dom";
+import "../styles/Livres.css"; // ✅ Import du CSS
 
 const Livres = () => {
   const [livres, setLivres] = useState([]);
@@ -13,22 +16,22 @@ const Livres = () => {
   }, []);
 
   return (
-    <div>
-      <h1>Liste des Livres</h1>
-      <ul>
+    <Box className="library-container">
+      {/* 🔥 Gestion des rangées dynamiques */}
+      <div className="shelf-container">
         {livres.map((livre) => (
-          <li key={livre.ID_Livre}>
-            <h2>{livre.Titre}</h2>
-            <p><strong>Auteur :</strong> {livre.Auteur}</p>
-            <p><strong>Genre :</strong> {livre.Genre}</p>
-            <p><strong>Résumé :</strong> {livre.Resume}</p>
-            {livre.URL_Couverture && (
-              <img src={livre.URL_Couverture} alt={livre.Titre} width="100" />
-            )}
-          </li>
+          <Box key={livre.ID_Livre} className="book-item">
+            <Link to={`/livre/${livre.ID_Livre}`} className="book-link">
+              {livre.URL_Couverture && (
+                <img src={livre.URL_Couverture} alt={livre.Titre} className="book-cover" />
+              )}
+            </Link>
+          </Box>
         ))}
-      </ul>
-    </div>
+      </div>
+      {/* ✅ Une seule étagère qui s'étend sous toutes les couvertures */}
+      <div className="shelf"></div>
+    </Box>
   );
 };
 

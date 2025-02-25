@@ -8,7 +8,8 @@ import Formulaire from "./pages/Formulaire";
 import Exploration from "./pages/Exploration";
 import Historique from "./pages/Historique";
 import About from "./pages/About";
-import HeroSection from "./components/HeroSection";
+import DetailsLivre from  "./pages/DetailsLivre";
+
 
 function App() {
   return (
@@ -23,6 +24,8 @@ function App() {
           <Route path="/exploration" element={<Exploration />} />
           <Route path="/historique" element={<Historique />} />
           <Route path="/about" element={<About />} />
+          <Route path="/livre/:id" element={<DetailsLivre />} />
+
         </Routes>
       </Router>
     </ThemeProvider>

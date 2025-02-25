@@ -15,4 +15,31 @@ export const fetchLivres = async () => {
       return [];
     }
   };
+
+  
+  
+  export const fetchLivreById = async (id) => {
+    try {
+      console.log(`📡 Récupération du livre ID ${id}...`);
+  
+      const response = await fetch(`http://127.0.0.1:8000/livres/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error(`❌ Erreur API: ${response.status} - ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      console.log(`📖 Détails du livre reçu (ID ${id}):`, data);
+      return data;
+    } catch (error) {
+      console.error(`❌ Erreur lors de la récupération du livre (ID ${id}) :`, error);
+      return null; // Retourne `null` si l'API échoue
+    }
+  };
+  
   
