@@ -40,7 +40,7 @@ const DétailsLivre = () => {
         {livre.Auteur}
       </Typography>
 
-      {/* 📌 Onglets Détails / Avis */}
+      {/* Onglets Détails / Avis */}
       <Paper sx={{ mt: 3, mb: 4 }}>
         <Tabs value={tabIndex} onChange={(e, newValue) => setTabIndex(newValue)} centered>
           <Tab label="📖 Détails du livre" />
@@ -48,7 +48,7 @@ const DétailsLivre = () => {
         </Tabs>
       </Paper>
 
-      {/* 🔄 Contenu des onglets */}
+      {/* Contenu des onglets */}
       {tabIndex === 0 ? (
         <Box sx={{ maxWidth: "600px", margin: "auto", textAlign: "left" }}>
           {livre.URL_Couverture && (

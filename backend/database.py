@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
-# Définition du chemin vers la base de données SQLite
+# chemin vers la base de données SQLite
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE_URL = f"sqlite:///{BASE_DIR}/../data/bdd_readmuse.db"
 

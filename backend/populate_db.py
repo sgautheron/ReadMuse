@@ -1,7 +1,7 @@
 import sqlite3
 from fetch_books import fetch_books_from_openlibrary
 
-# ✅ Chemin correct vers la base de données
+# Chemin vers la base de données
 DATABASE_PATH = "data/bdd_readmuse.db"  
 
 def insert_books(books):
@@ -19,6 +19,6 @@ def insert_books(books):
 
 
 if __name__ == "__main__":
-    books = fetch_books_from_openlibrary(100, 1)  # Récupère 100 livres de la première page
+    books = fetch_books_from_openlibrary(100, 1)  # Récupération des 100 livres de la première page
     insert_books(books)
     print("✅ Base de données mise à jour avec succès !")
