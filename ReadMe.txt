@@ -1,11 +1,8 @@
 ReadMuse - Guide d'installation et d'exécution
 
 Avant de lancer le projet, assurez-vous d'avoir installé les éléments suivants :
-
 Python 3.9+ (https://www.python.org/downloads/)
-
 Node.js 16+ (https://nodejs.org/)
-
 SQLite (inclus avec Python, mais peut nécessiter une installation spécifique selon l’OS)
 
 
@@ -16,33 +13,34 @@ SQLite (inclus avec Python, mais peut nécessiter une installation spécifique s
 
 Aller dans le dossier du parent :
 cd ReadMuse
-
-
 Installer les dépendances Python :
-
 pip install -r requirements.txt
 
+
 Lancer l’API FastAPI :
-
 python3 -m uvicorn backend.main:app --reload
-
 Adresse de l’API : http://127.0.0.1:8000/livres/
 
+Pour ajouter des livres : 
+cd ReadMuse
+python3 backend/fetch_books.py
 
 
 2.2. Frontend
 
 Aller dans le dossier du frontend :
-
 cd ReadMuse_UI
 
 Installer les dépendances :
-
 npm install
+npm install @mui/material @mui/icons-material @emotion/react @emotion/styled
 
 Lancer l’application React :
-
 npm run dev
 
-Adresse du frontend : http://localhost:5173/
+Adresse du frontend : 
+http://localhost:5173/
+
+
+
 
