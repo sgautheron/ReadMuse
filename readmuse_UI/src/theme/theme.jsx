@@ -3,10 +3,10 @@ import { createTheme } from "@mui/material/styles";
 const theme = createTheme({
   palette: {
     primary: {
-      main: "#e2823d", // Orange ReadMuse
+      main: "#e2823d", // Orange 
     },
     secondary: {
-      main: "#C09CFC", // Violet ReadMuse
+      main: "#C09CFC", // Violet 
     },
     background: {
       default: "#F5F0E6", // Fond clair
@@ -14,7 +14,7 @@ const theme = createTheme({
     text: {
       primary: "#333333", // Texte principal
       secondary: "#666666", // Texte secondaire
-      navbar: "#4B3F2F", // ✅ Marron foncé pour la navbar et les boutons
+      navbar: "#4B3F2F", // Marron foncé pour  navbar et  boutons
     },
   },
   typography: {
@@ -39,10 +39,10 @@ const theme = createTheme({
           textTransform: "none", // Pas de majuscules automatiques
           padding: "10px 20px", // Padding des boutons
           transition: "all 0.3s ease", // Effet de transition fluide
-          color: "#4B3F2F", // ✅ Marron foncé pour le texte des boutons
+          color: "#4B3F2F", // Marron foncé pour le texte des boutons
           "&:hover": {
-            backgroundColor: "#C09CFC", // Couleur de survol pour les boutons
-            color: "#ffffff", // Texte blanc au survol
+            backgroundColor: "#C09CFC", // Couleur de hover pour les boutons
+            color: "#ffffff", // Texte blanc au hover
           },
         },
       },

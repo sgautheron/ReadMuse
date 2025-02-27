@@ -1,25 +1,29 @@
+import { useState, useEffect } from "react";
 import { Box, TextField, Typography, Button, Grid, Paper, Divider, Autocomplete } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-
-// Exemple de données triées par ordre alphabétique
-const livres = [
-  { title: "1984", author: "George Orwell" },
-  { title: "Harry Potter à l'école des sorciers", author: "J.K. Rowling" },
-  { title: "L'Étranger", author: "Albert Camus" },
-  { title: "Le Petit Prince", author: "Antoine de Saint-Exupéry" },
-  { title: "Les Misérables", author: "Victor Hugo" },
-].sort((a, b) => a.title.localeCompare(b.title));
-
-const auteurs = [
-  "Albert Camus",
-  "Antoine de Saint-Exupéry",
-  "George Orwell",
-  "J.K. Rowling",
-  "Victor Hugo",
-].sort((a, b) => a.localeCompare(b));
+import { fetchLivres } from "../api/livres"; 
 
 function Formulaire() {
   const theme = useTheme();
+  const [livres, setLivres] = useState([]); // Stocke les livres récupérés depuis l’API
+  const [auteurs, setAuteurs] = useState([]); // Stocke les auteurs
+  const [selectedLivre, setSelectedLivre] = useState(null); // Stocke le livre sélectionné
+
+  // Récupération des livres depuis l’API
+  useEffect(() => {
+    const getLivres = async () => {
+      const data = await fetchLivres();
+      if (data && data.length > 0) {
+        // Tri des livres par titre et extraction les auteurs associés
+        const livresTries = data.sort((a, b) => a.Titre.localeCompare(b.Titre));
+        const auteursUniques = [...new Set(data.map((livre) => livre.Auteur))].sort();
+        
+        setLivres(livresTries);
+        setAuteurs(auteursUniques);
+      }
+    };
+    getLivres();
+  }, []);
 
   return (
     <Box
@@ -57,15 +61,19 @@ function Formulaire() {
           <Grid item xs={12} sm={6}>
             <Autocomplete
               options={livres}
-              getOptionLabel={(option) => option.title}
+              getOptionLabel={(option) => option.Titre}
               renderInput={(params) => <TextField {...params} label="Titre du livre" variant="outlined" />}
+              disabled={livres.length === 0} // Désactive si aucun livre récupéré
+              onChange={(event, newValue) => setSelectedLivre(newValue)} // Met à jour l'état
             />
           </Grid>
 
-          {/* Sélection de l'auteur */}
+          {/* Sélection de l'auteur (bloqué si un livre est sélectionné) */}
           <Grid item xs={12} sm={6}>
             <Autocomplete
               options={auteurs}
+              value={selectedLivre ? selectedLivre.Auteur : null} // Bloque l'auteur si un livre est sélectionné
+              getOptionDisabled={() => !!selectedLivre} // Désactive la sélection si un livre est choisi
               renderInput={(params) => <TextField {...params} label="Auteur" variant="outlined" />}
             />
           </Grid>
@@ -80,25 +88,13 @@ function Formulaire() {
             />
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Que pouvez-vous dire du style d'écriture ?"
-              variant="outlined"
-            />
+            <TextField fullWidth label="Que pouvez-vous dire du style d'écriture ?" variant="outlined" />
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Que pouvez-vous dire de l'intrigue ?"
-              variant="outlined"
-            />
+            <TextField fullWidth label="Que pouvez-vous dire de l'intrigue ?" variant="outlined" />
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Que pouvez-vous dire du thème ?"
-              variant="outlined"
-            />
+            <TextField fullWidth label="Que pouvez-vous dire du thème ?" variant="outlined" />
           </Grid>
         </Grid>
 

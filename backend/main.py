@@ -5,16 +5,15 @@ from backend.database import SessionLocal, engine
 from backend.models import Base, Livre
 from typing import List
 
-# Création des tables si elles n'existent pas
+# Création des tables
 Base.metadata.create_all(bind=engine)
 
 # Initialisation de FastAPI
 app = FastAPI()
 
-# 🔥 Autoriser toutes les origines (à changer en prod !)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ⛔ Mieux de mettre ["http://localhost:5174"] pour la sécurité
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -28,7 +27,7 @@ def get_db():
     finally:
         db.close()
 
-# ✅ Route pour récupérer TOUS les livres
+# Route pour récupérer tous les livres
 @app.get("/livres/", response_model=List[dict])
 def get_livres(db: Session = Depends(get_db)):  
     livres = db.query(Livre).all()
@@ -48,7 +47,7 @@ def get_livres(db: Session = Depends(get_db)):
         for b in livres
     ]
 
-# ✅ Route pour récupérer UN livre par ID
+# Route pour récupérer un livre par ID
 @app.get("/livres/{id}", response_model=dict)
 def get_livre(id: int, db: Session = Depends(get_db)):
     livre = db.query(Livre).filter(Livre.ID_Livre == id).first()
@@ -56,20 +55,25 @@ def get_livre(id: int, db: Session = Depends(get_db)):
     if not livre:
         raise HTTPException(status_code=404, detail="Livre non trouvé")
 
-    return {
+    livre_dict = {
         "ID_Livre": livre.ID_Livre,
         "Titre": livre.Titre,
         "Auteur": livre.Auteur,
         "Genre": livre.Genre,
         "Mots_Cles": livre.Mots_Cles,
-        "Resume": livre.Resume,
+        "Resume": livre.Resume,  # ✅ Vérifie ici
         "Date_Publication": livre.Date_Publication,
         "Editeur": livre.Editeur,
         "Nombre_Pages": livre.Nombre_Pages,
         "URL_Couverture": livre.URL_Couverture
     }
+    
+    print(f"📢 Données envoyées par l'API pour ID {id}:", livre_dict)
+    
+    return livre_dict
 
-# ✅ Route d'accueil
+
+# Route d'accueil
 @app.get("/")
 def home():
     return {"message": "Bienvenue sur l'API ReadMuse !"}

@@ -66,16 +66,16 @@ function HeroSection() {
       sx={{
         width: "400px",
         height: "100px",
-        backgroundColor: "#EADDC5", // ✅ Beige clair
-        color: "#5A3E2B", // ✅ Texte marron foncé
+        backgroundColor: "#EADDC5", // Beige clair
+        color: "#5A3E2B", // Texte marron foncé
         fontSize: "1.1rem",
         fontWeight: "bold",
-        borderRadius: "20px", // ✅ Coins arrondis
-        boxShadow: "3px 3px 10px rgba(0, 0, 0, 0.2)", // ✅ Effet de profondeur
+        borderRadius: "20px", // Coins arrondis
+        boxShadow: "3px 3px 10px rgba(0, 0, 0, 0.2)", // Effet de profondeur
         transition: "transform 0.2s ease-in-out",
         "&:hover": {
-          backgroundColor: "#D4C4A8", // ✅ Teinte plus foncée au survol
-          transform: "scale(1.05)", // ✅ Effet de zoom
+          backgroundColor: "#D4C4A8", // Teinte plus foncée au hover
+          transform: "scale(1.05)", // zoom
         },
       }}
     >

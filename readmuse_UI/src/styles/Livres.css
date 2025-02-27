@@ -1,4 +1,4 @@
-/* 🌟 Conteneur principal */
+/* Conteneur principal */
 .library-container {
     padding: 2rem;
     background-color: #f5f0e6; /* Fond beige */
@@ -7,15 +7,15 @@
     align-items: center;
 }
 
-/* 📚 Conteneur des rangées */
+/* Conteneur des rangées */
 .shelf-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-bottom: 50px; /* ✅ Ajoute de l'espace sous chaque étagère */
+    margin-bottom: 50px; 
 }
 
-/* 📖 Rangée de livres */
+/* Rangée de livres */
 .book-row {
     display: flex;
     justify-content: center;
@@ -23,32 +23,39 @@
     width: 100%;
 }
 
-/* 📖 Livres */
+/* Livres */
 .book-item {
-    width: 140px; /* ✅ Taille uniforme */
+    width: 140px; 
     text-align: center;
     position: relative;
     transition: transform 0.2s ease-in-out;
-    margin-bottom: -10px; /* 🔥 Ajustement pour coller à l'étagère */
+    margin-bottom: -10px; 
 }
 
-/* 📘 Images des livres */
+/* Couvertures des livres */
 .book-cover {
     width: 100%;
-    height: 200px; /* ✅ Hauteur uniforme */
-    object-fit: cover; /* ✅ Ajuste sans déformation */
+    height: 200px; 
+    object-fit: cover; 
     border-radius: 3px;
     box-shadow: 6px 10px 15px rgba(0, 0, 0, 0.4);
     cursor: pointer;
 }
 
-/* ✨ Étageres bien alignées avec les livres */
+/* Étageres */
 .shelf {
     height: 20px;
     background: linear-gradient(to bottom, #c8a97e 50%, #8b6f47 90%);
     border-radius: 15px;
     box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.5);
-    margin-top: 3px; /* 🔥 Ajustement pour que le livre repose dessus */
-    width: 100%; /* ✅ Prend toute la largeur */
-    max-width: 150vw; /* ✅ Pour s'ajuster à l'écran */
+    margin-top: 3px; 
+    width: 100%; 
+    max-width: 150vw; 
+}
+
+/* Effet hover sur les couvertures de livres */
+.book-cover:hover {
+    transform: scale(1.1); 
+    box-shadow: 8px 12px 20px rgba(0, 0, 0, 0.5); 
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }

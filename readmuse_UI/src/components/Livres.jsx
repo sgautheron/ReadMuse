@@ -15,10 +15,10 @@ const Livres = () => {
     };
     getLivres();
 
-    // ✅ Ajustement dynamique du nombre de livres par rangée
+    // Ajustement dynamique du nombre de livres par rangée
     const updateLivresParRangée = () => {
       const largeurEcran = window.innerWidth;
-      const livresMax = Math.floor(largeurEcran / 160); // ~150px par livre + marges
+      const livresMax = Math.floor(largeurEcran / 160);
       setLivresParRangée(livresMax > 1 ? livresMax : 1);
     };
 
@@ -30,7 +30,7 @@ const Livres = () => {
     };
   }, []);
 
-  // 🔥 Découpage dynamique en rangées
+  // Découpage dynamique en rangées
   const livresEnRangées = [];
   for (let i = 0; i < livres.length; i += livresParRangée) {
     livresEnRangées.push(livres.slice(i, i + livresParRangée));
@@ -52,7 +52,7 @@ const Livres = () => {
               </Box>
             ))}
           </Box>
-          {/* 🏗️ Étagère alignée exactement avec la rangée */}
+          {/* Étagère alignée avec la rangée */}
           <Box className="shelf" style={{ width: `${rangée.length * 150}px` }}></Box>
         </Box>
       ))}

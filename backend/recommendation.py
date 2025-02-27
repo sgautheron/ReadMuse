@@ -35,5 +35,5 @@ def recommend_books(user_id):
     return recommendations
 
 if __name__ == "__main__":
-    user_id_test = 1  # Remplace par un ID réel
+    user_id_test = 1 
     print(recommend_books(user_id_test))

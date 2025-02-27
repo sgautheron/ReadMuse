@@ -1,4 +1,3 @@
--- Création de la table Utilisateurs
 CREATE TABLE Utilisateurs (
     ID_Utilisateur INTEGER PRIMARY KEY AUTOINCREMENT,
     Nom VARCHAR(100) NOT NULL,
@@ -10,7 +9,6 @@ CREATE TABLE Utilisateurs (
     Derniere_Connexion TIMESTAMP
 );
 
--- Création de la table Livres
 CREATE TABLE Livres (
     ID_Livre INTEGER PRIMARY KEY AUTOINCREMENT,
     Titre VARCHAR(255) NOT NULL,
@@ -25,7 +23,6 @@ CREATE TABLE Livres (
     URL_Couverture TEXT
 );
 
--- Création de la table Interactions
 CREATE TABLE Interactions (
     ID_Interaction INTEGER PRIMARY KEY AUTOINCREMENT,
     ID_Utilisateur INTEGER NOT NULL,
@@ -37,13 +34,11 @@ CREATE TABLE Interactions (
     FOREIGN KEY (ID_Livre) REFERENCES Livres(ID_Livre) ON DELETE CASCADE
 );
 
--- Création de la table Mots Clés
 CREATE TABLE Mots_Cles (
     ID_Mot_Cle INTEGER PRIMARY KEY AUTOINCREMENT,
     Mot_Cle VARCHAR(100) UNIQUE NOT NULL
 );
 
--- Création de la table Mots Clés Livres (relation N-N entre Livres et Mots Clés)
 CREATE TABLE Mots_Cles_Livres (
     ID_Livre INTEGER NOT NULL,
     ID_Mot_Cle INTEGER NOT NULL,
@@ -52,7 +47,6 @@ CREATE TABLE Mots_Cles_Livres (
     FOREIGN KEY (ID_Mot_Cle) REFERENCES Mots_Cles(ID_Mot_Cle) ON DELETE CASCADE
 );
 
--- Création de la table Recommendations
 CREATE TABLE Recommendations (
     ID_Recommandation INTEGER PRIMARY KEY AUTOINCREMENT,
     ID_Utilisateur INTEGER NOT NULL,

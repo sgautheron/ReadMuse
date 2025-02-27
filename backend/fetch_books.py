@@ -2,53 +2,92 @@ import requests
 import sqlite3
 import time
 
-# ✅ Chemin correct vers la base de données
+# Chemin vers la base de données
 DATABASE_PATH = "data/bdd_readmuse.db"
 
+# Nombre max de résultats par page
+RESULTS_PER_PAGE = 100  
+TOTAL_RESULTS = 1000  # Nombre total de livres à récupérer
 
-API_KEY = "AIzaSyAkiZ59B6x_NGhmcC1Emvd3lc1IfgHbNO4"
+# Liste des genres
+GENRES = [
+    "science_fiction", "fantasy", "mystery", "romance",
+    "historical_fiction", "horror", "biography", "self_help",
+    "poetry", "children", "young_adult", "thriller", "philosophy"
+]
 
-def fetch_books_from_google(query="fiction", max_results=100):
-    url = f"https://www.googleapis.com/books/v1/volumes?q={query}&maxResults={max_results}&key={API_KEY}"
+def fetch_book_details(olid):
+    """ 🔍 Récupère les détails d'un livre via son OLID (Résumé + Nombre de pages) """
+    url = f"https://openlibrary.org/works/{olid}.json"
     
     try:
         response = requests.get(url)
-        response.raise_for_status()  # Lève une erreur si la requête échoue
-        books = response.json()
+        response.raise_for_status()
+        book = response.json()
+
+        # Récupération du résumé
+        resume = book.get("description", {})
+        if isinstance(resume, dict):
+            resume = resume.get("value", "")
+
+        # Récupération du nombre de pages via l'édition
+        edition_id = book.get("covers", [None])[0]  # première édition si dispo
+        if edition_id:
+            pages = fetch_pages_from_edition(edition_id)
+        else:
+            pages = "Nombre de pages inconnu"
+
+        return {
+            "Resume": resume if resume else "Résumé non disponible",
+            "Nombre_Pages": pages
+        }
+    except requests.RequestException:
+        return {"Resume": "Résumé non disponible", "Nombre_Pages": "Nombre de pages inconnu"}
+
+def fetch_pages_from_edition(edition_id):
+    """ 📖 Récupère le nombre de pages via l'édition d'un livre """
+    url = f"https://openlibrary.org/books/{edition_id}.json"
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        edition = response.json()
+        return edition.get("number_of_pages", "Nombre de pages inconnu")
+    except requests.RequestException:
+        return "Nombre de pages inconnu"
+
+def fetch_books_by_subject(subject, limit=RESULTS_PER_PAGE):
+    """ 📚 Récupère les livres d'un sujet donné sur Open Library """
+    url = f"https://openlibrary.org/subjects/{subject}.json?limit={limit}"
+    
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+        books = response.json().get("works", [])
     except requests.RequestException as e:
-        print(f"⚠️ Erreur lors de la récupération des livres : {e}")
+        print(f"⚠️ Erreur lors de la récupération des livres ({subject}): {e}")
         return []
 
     book_data = []
-    for item in books.get("items", []):
-        volume_info = item.get("volumeInfo", {})
-
-        # Gestion de l'ISBN (certains livres ont plusieurs formats)
-        industry_identifiers = volume_info.get("industryIdentifiers", [])
-        isbn = ""
-        if industry_identifiers:
-            for identifier in industry_identifiers:
-                if identifier.get("type") == "ISBN_13":
-                    isbn = identifier.get("identifier", "")
-                    break  # Priorité à ISBN_13
+    for book in books:
+        olid = book.get("key", "").replace("/works/", "")
+        details = fetch_book_details(olid)  # Récupération du résumé + nb de pages
 
         book_data.append({
-            "Titre": volume_info.get("title", "N/A"),
-            "Auteur": ", ".join(volume_info.get("authors", ["Inconnu"])),
-            "Genre": ", ".join(volume_info.get("categories", ["Inconnu"])),
-            "Mots_Cles": ", ".join(volume_info.get("categories", [""])),  
-            "Résumé": volume_info.get("description", ""),
-            "Date_Publication": volume_info.get("publishedDate", ""),
-            "Editeur": volume_info.get("publisher", "Inconnu"),
-            "Nombre_Pages": volume_info.get("pageCount", 0),
-            "ISBN": isbn,
-            "URL_Couverture": volume_info.get("imageLinks", {}).get("thumbnail", ""),
+            "Titre": book.get("title", "N/A"),
+            "Auteur": ", ".join([a["name"] for a in book.get("authors", [{"name": "Inconnu"}])]),
+            "Genre": subject.replace("_", " ").title(),  # Convertit "science_fiction" → "Science Fiction"
+            "Date_Publication": book.get("first_publish_year", ""),
+            "Editeur": "Inconnu",
+            "Resume": details["Resume"],  # Ajout du résumé
+            "Nombre_Pages": details["Nombre_Pages"],  # Ajout du nb de pages
+            "URL_Couverture": f"https://covers.openlibrary.org/b/id/{book.get('cover_id', '')}-L.jpg" if book.get("cover_id") else "",
         })
 
+    print(f"✅ {len(book_data)} livres récupérés pour le sujet '{subject}'")
     return book_data
 
 def insert_books(books):
-    """ Insère les livres dans la base de données en évitant les doublons d'ISBN. """
     if not books:
         print("⚠️ Aucun livre à insérer.")
         return
@@ -58,26 +97,27 @@ def insert_books(books):
 
     cursor.executemany("""
         INSERT OR IGNORE INTO Livres 
-        (Titre, Auteur, Genre, Mots_Cles, Resume, Date_Publication, Editeur, Nombre_Pages, ISBN, URL_Couverture)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, [(b["Titre"], b["Auteur"], b["Genre"], b["Mots_Cles"], b["Résumé"], b["Date_Publication"], b["Editeur"], b["Nombre_Pages"], b["ISBN"], b["URL_Couverture"]) for b in books])
+        (Titre, Auteur, Genre, Date_Publication, Editeur, Resume, Nombre_Pages, URL_Couverture)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, [(b["Titre"], b["Auteur"], b["Genre"], b["Date_Publication"], b["Editeur"], 
+           b["Resume"], b["Nombre_Pages"], b["URL_Couverture"]) for b in books])
 
     conn.commit()
     conn.close()
-    print(f"✅ {len(books)} nouveaux livres insérés !")
+    print(f"✅ {len(books)} nouveaux livres insérés avec résumé et nombre de pages !")
 
 if __name__ == "__main__":
-    genres = ["science fiction", "fantasy", "history", "mystery", "romance", "thriller", "non-fiction"]
+    all_books = []
+    
+    # Récupération des livres pour chaque genre
+    for genre in GENRES:
+        print(f"📚 Récupération des livres pour le genre : {genre}")
+        books = fetch_books_by_subject(genre)
+        all_books.extend(books)
+        time.sleep(1) 
 
-all_books = []
-for genre in genres:
-    print(f"📚 Récupération de livres pour le genre : {genre}")
-    books = fetch_books_from_google(genre, 10)  # Récupère 100 livres par genre
-    all_books.extend(books)  # Ajoute les livres à la liste principale
-    time.sleep(2)  # ⏳ Ajoute une pause de 2 secondes entre chaque requête
-
-if all_books:
-    insert_books(all_books)
-    print(f"✅ Base de données mise à jour avec {len(all_books)} nouveaux livres !")
-else:
-    print("⚠️ Aucun livre ajouté à la base de données.")
+    if all_books:
+        insert_books(all_books)
+        print(f"✅ Base de données mise à jour avec {len(all_books)} nouveaux livres !")
+    else:
+        print("⚠️ Aucun livre ajouté à la base de données.")

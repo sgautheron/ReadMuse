@@ -38,8 +38,19 @@ export const fetchLivres = async () => {
       return data;
     } catch (error) {
       console.error(`❌ Erreur lors de la récupération du livre (ID ${id}) :`, error);
-      return null; // Retourne `null` si l'API échoue
+      return null; 
     }
   };
+
+  export const fetchReviewsByBookId = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8000/livres/${id}/reviews`);
+      return await response.json();
+    } catch (error) {
+      console.error("Erreur lors de la récupération des avis :", error);
+      return [];
+    }
+  };
+  
   
   
