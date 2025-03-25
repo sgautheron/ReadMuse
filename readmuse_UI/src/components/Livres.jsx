@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchLivres } from "../api/livres";
 import { Box } from "@mui/material";
 import { Link } from "react-router-dom";
-import "../styles/Livres.css"; // ✅ Import du CSS
+import "../styles/Livres.css"; 
 
 const Livres = () => {
   const [livres, setLivres] = useState([]);
@@ -15,7 +15,6 @@ const Livres = () => {
     };
     getLivres();
 
-    // Ajustement dynamique du nombre de livres par rangée
     const updateLivresParRangée = () => {
       const largeurEcran = window.innerWidth;
       const livresMax = Math.floor(largeurEcran / 160);
@@ -30,10 +29,22 @@ const Livres = () => {
     };
   }, []);
 
-  // Découpage dynamique en rangées
   const livresEnRangées = [];
-  for (let i = 0; i < livres.length; i += livresParRangée) {
-    livresEnRangées.push(livres.slice(i, i + livresParRangée));
+  let tempRangée = [];
+
+  livres.forEach((livre, index) => {
+    tempRangée.push(livre);
+    if (tempRangée.length === livresParRangée) {
+      livresEnRangées.push(tempRangée);
+      tempRangée = [];
+    }
+  });
+
+  if (tempRangée.length > 0) {
+    while (tempRangée.length < livresParRangée) {
+      tempRangée.push(null); // Ajouter des espaces vides
+    }
+    livresEnRangées.push(tempRangée);
   }
 
   return (
@@ -42,18 +53,24 @@ const Livres = () => {
         <Box key={index} className="shelf-container">
           {/* 📚 Livres */}
           <Box className="book-row">
-            {rangée.map((livre) => (
-              <Box key={livre.ID_Livre} className="book-item">
-                <Link to={`/livre/${livre.ID_Livre}`} className="book-link">
-                  {livre.URL_Couverture && (
-                    <img src={livre.URL_Couverture} alt={livre.Titre} className="book-cover" />
-                  )}
-                </Link>
-              </Box>
-            ))}
+          {rangée.map((livre, idx) => (
+  <Box
+  key={livre ? `livre-${livre.ID_Livre}-${index}-${idx}` : `vide-${index}-${idx}`}
+  className="book-item"
+  >
+    {livre ? (
+      <Link to={`/livre/${livre.ID_Livre}`} className="book-link">
+        {livre.URL_Couverture && (
+          <img src={livre.URL_Couverture} alt={livre.Titre} className="book-cover" />
+        )}
+      </Link>
+    ) : (
+      <div className="book-placeholder"></div>
+    )}
+  </Box>
+))}
           </Box>
-          {/* Étagère alignée avec la rangée */}
-          <Box className="shelf" style={{ width: `${rangée.length * 150}px` }}></Box>
+          <Box className="shelf" style={{ width: `${livresParRangée * 150}px` }}></Box>
         </Box>
       ))}
     </Box>

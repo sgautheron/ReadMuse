@@ -32,8 +32,15 @@ const DétailsLivre = () => {
   }
 
   return (
-    <Box sx={{ padding: 4, textAlign: "center" }}>
-      <Typography variant="h4" fontWeight="bold" gutterBottom>
+<Box sx={{ 
+    padding: 4, 
+    textAlign: "center", 
+    marginTop: "80px",
+    maxWidth: "800px",  // ✅ Limite la largeur du contenu
+    marginLeft: "auto",  // ✅ Centre horizontalement
+    marginRight: "auto"  // ✅ Centre horizontalement
+}}>
+<Typography variant="h4" fontWeight="bold" gutterBottom>
         {livre.Titre}
       </Typography>
       <Typography variant="h6" color="text.secondary">

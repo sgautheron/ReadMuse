@@ -2,66 +2,67 @@ import requests
 import sqlite3
 import time
 
-# Chemin vers la base de données
+# ✅ Chemin vers la base de données
 DATABASE_PATH = "data/bdd_readmuse.db"
 
-# Nombre max de résultats par page
-RESULTS_PER_PAGE = 100  
-TOTAL_RESULTS = 1000  # Nombre total de livres à récupérer
+# 🔹 Nombre max de résultats par page (on réduit à 20 pour éviter erreurs 500)
+RESULTS_PER_PAGE = 20  
 
-# Liste des genres
+# 🎯 Genres ciblés (thèmes populaires sur Open Library)
 GENRES = [
     "science_fiction", "fantasy", "mystery", "romance",
     "historical_fiction", "horror", "biography", "self_help",
     "poetry", "children", "young_adult", "thriller", "philosophy"
 ]
 
+# ✅ Header pour éviter les blocages serveurs
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (compatible; ReadMuseBot/1.0; +http://readmuse.fr)"
+}
+
 def fetch_book_details(olid):
-    """ 🔍 Récupère les détails d'un livre via son OLID (Résumé + Nombre de pages) """
+    """ 🔍 Récupère les détails d'un livre via son OLID : résumé et pages """
     url = f"https://openlibrary.org/works/{olid}.json"
     
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
         book = response.json()
 
-        # Récupération du résumé
+        # Résumé
         resume = book.get("description", {})
         if isinstance(resume, dict):
             resume = resume.get("value", "")
-
-        # Récupération du nombre de pages via l'édition
-        edition_id = book.get("covers", [None])[0]  # première édition si dispo
-        if edition_id:
-            pages = fetch_pages_from_edition(edition_id)
+        elif isinstance(resume, str):
+            resume = resume
         else:
-            pages = "Nombre de pages inconnu"
+            resume = ""
+
+        # 🔍 Pour récupérer une édition et en extraire les pages
+        editions_url = f"https://openlibrary.org/works/{olid}/editions.json?limit=1"
+        pages = "Inconnu"
+        try:
+            res_ed = requests.get(editions_url, headers=HEADERS)
+            res_ed.raise_for_status()
+            editions = res_ed.json().get("entries", [])
+            if editions:
+                pages = editions[0].get("number_of_pages", "Inconnu")
+        except requests.RequestException:
+            pass
 
         return {
-            "Resume": resume if resume else "Résumé non disponible",
+            "Resume": resume.strip() if resume else "Résumé non disponible",
             "Nombre_Pages": pages
         }
     except requests.RequestException:
-        return {"Resume": "Résumé non disponible", "Nombre_Pages": "Nombre de pages inconnu"}
-
-def fetch_pages_from_edition(edition_id):
-    """ 📖 Récupère le nombre de pages via l'édition d'un livre """
-    url = f"https://openlibrary.org/books/{edition_id}.json"
-
-    try:
-        response = requests.get(url)
-        response.raise_for_status()
-        edition = response.json()
-        return edition.get("number_of_pages", "Nombre de pages inconnu")
-    except requests.RequestException:
-        return "Nombre de pages inconnu"
+        return {"Resume": "Résumé non disponible", "Nombre_Pages": "Inconnu"}
 
 def fetch_books_by_subject(subject, limit=RESULTS_PER_PAGE):
-    """ 📚 Récupère les livres d'un sujet donné sur Open Library """
-    url = f"https://openlibrary.org/subjects/{subject}.json?limit={limit}"
+    """ 📚 Récupère les livres populaires d’un sujet Open Library """
+    url = f"https://openlibrary.org/subjects/{subject}.json?limit={limit}&sort=edition_count"
     
     try:
-        response = requests.get(url)
+        response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
         books = response.json().get("works", [])
     except requests.RequestException as e:
@@ -71,16 +72,16 @@ def fetch_books_by_subject(subject, limit=RESULTS_PER_PAGE):
     book_data = []
     for book in books:
         olid = book.get("key", "").replace("/works/", "")
-        details = fetch_book_details(olid)  # Récupération du résumé + nb de pages
+        details = fetch_book_details(olid)
 
         book_data.append({
             "Titre": book.get("title", "N/A"),
             "Auteur": ", ".join([a["name"] for a in book.get("authors", [{"name": "Inconnu"}])]),
-            "Genre": subject.replace("_", " ").title(),  # Convertit "science_fiction" → "Science Fiction"
+            "Genre": subject.replace("_", " ").title(),
             "Date_Publication": book.get("first_publish_year", ""),
             "Editeur": "Inconnu",
-            "Resume": details["Resume"],  # Ajout du résumé
-            "Nombre_Pages": details["Nombre_Pages"],  # Ajout du nb de pages
+            "Resume": details["Resume"],
+            "Nombre_Pages": details["Nombre_Pages"],
             "URL_Couverture": f"https://covers.openlibrary.org/b/id/{book.get('cover_id', '')}-L.jpg" if book.get("cover_id") else "",
         })
 
@@ -104,20 +105,19 @@ def insert_books(books):
 
     conn.commit()
     conn.close()
-    print(f"✅ {len(books)} nouveaux livres insérés avec résumé et nombre de pages !")
+    print(f"📚 {len(books)} livres insérés avec succès dans la base !")
 
 if __name__ == "__main__":
     all_books = []
     
-    # Récupération des livres pour chaque genre
     for genre in GENRES:
         print(f"📚 Récupération des livres pour le genre : {genre}")
         books = fetch_books_by_subject(genre)
         all_books.extend(books)
-        time.sleep(1) 
+        time.sleep(1)  # 🔄 Pause pour éviter d’être bloqué
 
     if all_books:
         insert_books(all_books)
-        print(f"✅ Base de données mise à jour avec {len(all_books)} nouveaux livres !")
+        print(f"🎉 Base de données mise à jour avec {len(all_books)} livres populaires !")
     else:
-        print("⚠️ Aucun livre ajouté à la base de données.")
+        print("⚠️ Aucun livre ajouté.")
