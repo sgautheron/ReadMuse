@@ -12,9 +12,15 @@ function Navbar() {
   const theme = useTheme();
 
   return (
-    <AppBar position="fixed" sx={{ bgcolor: theme.palette.background.default, width: "100%", color: theme.palette.text.navbar }}>  
+    <AppBar
+      position="fixed"
+      sx={{
+        bgcolor: theme.palette.background.default,
+        width: "100%",
+        color: theme.palette.text.navbar,
+      }}
+    >
       <Toolbar sx={{ justifyContent: "space-between" }}>
-        
         <Box display="flex" alignItems="center">
           <IconButton edge="start" color="inherit" aria-label="logo" component={Link} to="/">
             <LibraryBooksIcon />

@@ -24,15 +24,26 @@ function Formulaire() {
   const [message, setMessage] = useState(null);
   const [note, setNote] = useState("");
 
-
   useEffect(() => {
     const getLivres = async () => {
       const data = await fetchLivres();
       if (data && data.length > 0) {
-        const livresTries = data.sort((a, b) => a.Titre.localeCompare(b.Titre));
+        // ➕ Élimine les doublons de titre (en gardant le premier pour chaque titre)
+        const titresUniquesMap = new Map();
+        data.forEach((livre) => {
+          const titreCle = livre.Titre.toLowerCase().trim();
+          if (!titresUniquesMap.has(titreCle)) {
+            titresUniquesMap.set(titreCle, livre);
+          }
+        });
+
+        const livresUniques = Array.from(titresUniquesMap.values()).sort((a, b) =>
+          a.Titre.localeCompare(b.Titre)
+        );
+
         const auteursUniques = [...new Set(data.map((livre) => livre.Auteur))].sort();
 
-        setLivres(livresTries);
+        setLivres(livresUniques);
         setAuteurs(auteursUniques);
       }
     };
@@ -53,7 +64,6 @@ function Formulaire() {
       Theme: themeText,
     };
     console.log("👉 Données envoyées :", preferenceData);
-
 
     try {
       const response = await fetch("http://127.0.0.1:8000/interactions/", {
@@ -97,7 +107,8 @@ function Formulaire() {
           Partagez vos Préférences
         </Typography>
         <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mb: 3 }}>
-          Décrivez un livre que vous avez aimé. Nous analyserons vos réponses pour vous recommander des lectures adaptées !
+          Décrivez un livre que vous avez aimé. Nous analyserons vos réponses pour vous recommander
+          des lectures adaptées !
         </Typography>
 
         <Divider sx={{ mb: 3 }} />
@@ -107,7 +118,14 @@ function Formulaire() {
             <Autocomplete
               options={livres}
               getOptionLabel={(option) => option.Titre}
-              renderInput={(params) => <TextField {...params} label="Titre du livre" variant="outlined" />}
+              filterOptions={(options, state) =>
+                options.filter((opt) =>
+                  opt.Titre.toLowerCase().includes(state.inputValue.toLowerCase())
+                )
+              }
+              renderInput={(params) => (
+                <TextField {...params} label="Titre du livre" variant="outlined" />
+              )}
               disabled={livres.length === 0}
               onChange={(event, newValue) => setSelectedLivre(newValue)}
             />
@@ -117,8 +135,14 @@ function Formulaire() {
             <Autocomplete
               options={auteurs}
               value={selectedLivre ? selectedLivre.Auteur : null}
-              getOptionDisabled={() => !!selectedLivre}
+              onChange={(event, newAuteur) => {
+                if (!newAuteur) return;
+                const livreAssocie = livres.find((livre) => livre.Auteur === newAuteur);
+                setSelectedLivre(livreAssocie || null);
+              }}
+              getOptionLabel={(option) => option}
               renderInput={(params) => <TextField {...params} label="Auteur" variant="outlined" />}
+              disabled={livres.length === 0}
             />
           </Grid>
 
@@ -142,16 +166,16 @@ function Formulaire() {
             />
           </Grid>
           <Grid item xs={12}>
-              <TextField
-                fullWidth
-                label="Note sur 5"
-                variant="outlined"
-                type="number"
-                inputProps={{ min: 1, max: 5 }}
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-              />
-            </Grid>
+            <TextField
+              fullWidth
+              label="Note sur 5"
+              variant="outlined"
+              type="number"
+              inputProps={{ min: 1, max: 5 }}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+            />
+          </Grid>
 
           <Grid item xs={12}>
             <TextField
@@ -162,7 +186,6 @@ function Formulaire() {
               onChange={(e) => setThemeText(e.target.value)}
             />
           </Grid>
-          
         </Grid>
 
         {message && (

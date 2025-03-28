@@ -8,12 +8,11 @@ import Formulaire from "./pages/Formulaire";
 import Exploration from "./pages/Exploration";
 import Historique from "./pages/Historique";
 import About from "./pages/About";
-import DetailsLivre from  "./pages/DetailsLivre";
-
+import DetailsLivre from "./pages/DetailsLivre";
 
 function App() {
   return (
-    <ThemeProvider theme={theme}> 
+    <ThemeProvider theme={theme}>
       <CssBaseline />
 
       <Router>
@@ -25,7 +24,6 @@ function App() {
           <Route path="/historique" element={<Historique />} />
           <Route path="/about" element={<About />} />
           <Route path="/livre/:id" element={<DetailsLivre />} />
-
         </Routes>
       </Router>
     </ThemeProvider>

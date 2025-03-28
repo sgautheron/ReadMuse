@@ -1,10 +1,7 @@
 import HeroSection from "../components/HeroSection";
 
-function Accueil() {    return (
+function Accueil() {
+  return <HeroSection />;
+}
 
-  <HeroSection />
-);
-  }
-  
-  export default Accueil;
-  
+export default Accueil;

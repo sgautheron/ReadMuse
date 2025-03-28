@@ -1,4 +1,11 @@
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Typography } from "@mui/material";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Typography,
+} from "@mui/material";
 
 function InfoModal({ open, handleClose }) {
   return (
@@ -6,11 +13,12 @@ function InfoModal({ open, handleClose }) {
       <DialogTitle>✨ Bienvenue sur ReadMuse !</DialogTitle>
       <DialogContent>
         <Typography gutterBottom>
-          ReadMuse vous aide à découvrir des livres adaptés à vos goûts. Décrivez un livre que vous avez aimé,
-          et nous vous proposerons des recommandations personnalisées.
+          ReadMuse vous aide à découvrir des livres adaptés à vos goûts. Décrivez un livre que vous
+          avez aimé, et nous vous proposerons des recommandations personnalisées.
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          Plus vous partagez vos préférences, plus nos suggestions s'affineront pour vous offrir des lectures inoubliables. 📖
+          Plus vous partagez vos préférences, plus nos suggestions s'affineront pour vous offrir des
+          lectures inoubliables. 📖
         </Typography>
       </DialogContent>
       <DialogActions>

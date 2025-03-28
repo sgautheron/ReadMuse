@@ -32,9 +32,14 @@ function HeroSection() {
           ReadMuse
         </Typography>
         <Typography variant="body1" mb={3}>
-          Découvrez des recommandations littéraires personnalisées. Trouvez votre prochain livre en quelques clics grâce à vos préférences de lecture !
+          Découvrez des recommandations littéraires personnalisées. Trouvez votre prochain livre en
+          quelques clics grâce à vos préférences de lecture !
         </Typography>
-        <Button variant="contained" sx={{ bgcolor: theme.palette.primary.main, color: "#fff", px: 4 }} onClick={handleOpen}>
+        <Button
+          variant="contained"
+          sx={{ bgcolor: theme.palette.primary.main, color: "#fff", px: 4 }}
+          onClick={handleOpen}
+        >
           En savoir plus
         </Button>
       </motion.div>
@@ -56,64 +61,61 @@ function HeroSection() {
         }}
       >
         <Container>
-        <Grid container spacing={3} direction="column" alignItems="center">
-  
-  <Grid item>
-    <Button
-      variant="contained"
-      component={Link}
-      to="/formulaire"
-      sx={{
-        width: "400px",
-        height: "100px",
-        backgroundColor: "#EADDC5", // Beige clair
-        color: "#5A3E2B", // Texte marron foncé
-        fontSize: "1.1rem",
-        fontWeight: "bold",
-        borderRadius: "20px", // Coins arrondis
-        boxShadow: "3px 3px 10px rgba(0, 0, 0, 0.2)", // Effet de profondeur
-        transition: "transform 0.2s ease-in-out",
-        "&:hover": {
-          backgroundColor: "#D4C4A8", // Teinte plus foncée au hover
-          transform: "scale(1.05)", // zoom
-        },
-      }}
-    >
-      Décrire mes préférences
-    </Button>
-  </Grid>
+          <Grid container spacing={3} direction="column" alignItems="center">
+            <Grid item>
+              <Button
+                variant="contained"
+                component={Link}
+                to="/formulaire"
+                sx={{
+                  width: "400px",
+                  height: "100px",
+                  backgroundColor: "#EADDC5", // Beige clair
+                  color: "#5A3E2B", // Texte marron foncé
+                  fontSize: "1.1rem",
+                  fontWeight: "bold",
+                  borderRadius: "20px", // Coins arrondis
+                  boxShadow: "3px 3px 10px rgba(0, 0, 0, 0.2)", // Effet de profondeur
+                  transition: "transform 0.2s ease-in-out",
+                  "&:hover": {
+                    backgroundColor: "#D4C4A8", // Teinte plus foncée au hover
+                    transform: "scale(1.05)", // zoom
+                  },
+                }}
+              >
+                Décrire mes préférences
+              </Button>
+            </Grid>
 
-  {/* Bouton "Explorer les livres" */}
-  <Grid item>
-    <Button
-      variant="contained"
-      component={Link}
-      to="/exploration"
-      sx={{
-        width: "400px",
-        height: "100px",
-        backgroundColor: "#EADDC5",
-        color: "#5A3E2B",
-        fontSize: "1.1rem",
-        fontWeight: "bold",
-        borderRadius: "20px",
-        boxShadow: "3px 3px 10px rgba(0, 0, 0, 0.2)",
-        transition: "transform 0.2s ease-in-out",
-        "&:hover": {
-          backgroundColor: "#D4C4A8",
-          transform: "scale(1.05)",
-        },
-      }}
-    >
-      Explorer les livres
-    </Button>
-  </Grid>
-</Grid>
-
+            {/* Bouton "Explorer les livres" */}
+            <Grid item>
+              <Button
+                variant="contained"
+                component={Link}
+                to="/exploration"
+                sx={{
+                  width: "400px",
+                  height: "100px",
+                  backgroundColor: "#EADDC5",
+                  color: "#5A3E2B",
+                  fontSize: "1.1rem",
+                  fontWeight: "bold",
+                  borderRadius: "20px",
+                  boxShadow: "3px 3px 10px rgba(0, 0, 0, 0.2)",
+                  transition: "transform 0.2s ease-in-out",
+                  "&:hover": {
+                    backgroundColor: "#D4C4A8",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              >
+                Explorer les livres
+              </Button>
+            </Grid>
+          </Grid>
         </Container>
       </motion.div>
 
-      
       <InfoModal open={open} handleClose={handleClose} />
     </Box>
   );

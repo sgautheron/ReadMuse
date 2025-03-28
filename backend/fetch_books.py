@@ -2,122 +2,110 @@ import requests
 import sqlite3
 import time
 
-# ✅ Chemin vers la base de données
-DATABASE_PATH = "data/bdd_readmuse.db"
+# 🔐 Ta clé API Google Books
+API_KEY = "AIzaSyAkiZ59B6x_NGhmcC1Emvd3lc1IfgHbNO4"
 
-# 🔹 Nombre max de résultats par page (on réduit à 20 pour éviter erreurs 500)
-RESULTS_PER_PAGE = 20  
+# 📍 Chemin vers la base de données
+import os
+DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data/bdd_readmuse.db"))
 
-# 🎯 Genres ciblés (thèmes populaires sur Open Library)
-GENRES = [
-    "science_fiction", "fantasy", "mystery", "romance",
-    "historical_fiction", "horror", "biography", "self_help",
-    "poetry", "children", "young_adult", "thriller", "philosophy"
-]
+# 📊 Paramètres
+START_INDEX = 0  # 👉 Indice de départ pour ne pas reprendre les mêmes
+TOTAL_RESULTS = 500
+MAX_RESULTS = 40  # Max autorisé par Google Books
 
-# ✅ Header pour éviter les blocages serveurs
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; ReadMuseBot/1.0; +http://readmuse.fr)"
-}
-
-def fetch_book_details(olid):
-    """ 🔍 Récupère les détails d'un livre via son OLID : résumé et pages """
-    url = f"https://openlibrary.org/works/{olid}.json"
+def fetch_books_from_google(start_index=0, max_results=MAX_RESULTS):
+    """Récupère des livres en français depuis Google Books."""
+    url = (
+        f"https://www.googleapis.com/books/v1/volumes?"
+        f"q=roman ado&startIndex={start_index}&maxResults={max_results}"
+        f"&langRestrict=fr&printType=books&key={API_KEY}"
+    )
     
     try:
-        response = requests.get(url, headers=HEADERS)
+        response = requests.get(url)
         response.raise_for_status()
-        book = response.json()
-
-        # Résumé
-        resume = book.get("description", {})
-        if isinstance(resume, dict):
-            resume = resume.get("value", "")
-        elif isinstance(resume, str):
-            resume = resume
-        else:
-            resume = ""
-
-        # 🔍 Pour récupérer une édition et en extraire les pages
-        editions_url = f"https://openlibrary.org/works/{olid}/editions.json?limit=1"
-        pages = "Inconnu"
-        try:
-            res_ed = requests.get(editions_url, headers=HEADERS)
-            res_ed.raise_for_status()
-            editions = res_ed.json().get("entries", [])
-            if editions:
-                pages = editions[0].get("number_of_pages", "Inconnu")
-        except requests.RequestException:
-            pass
-
-        return {
-            "Resume": resume.strip() if resume else "Résumé non disponible",
-            "Nombre_Pages": pages
-        }
-    except requests.RequestException:
-        return {"Resume": "Résumé non disponible", "Nombre_Pages": "Inconnu"}
-
-def fetch_books_by_subject(subject, limit=RESULTS_PER_PAGE):
-    """ 📚 Récupère les livres populaires d’un sujet Open Library """
-    url = f"https://openlibrary.org/subjects/{subject}.json?limit={limit}&sort=edition_count"
-    
-    try:
-        response = requests.get(url, headers=HEADERS)
-        response.raise_for_status()
-        books = response.json().get("works", [])
+        data = response.json()
+        return data.get("items", [])
     except requests.RequestException as e:
-        print(f"⚠️ Erreur lors de la récupération des livres ({subject}): {e}")
+        print(f"⚠️ Erreur API Google Books : {e}")
         return []
 
-    book_data = []
-    for book in books:
-        olid = book.get("key", "").replace("/works/", "")
-        details = fetch_book_details(olid)
+def extract_book_data(item):
+    """Extrait les données utiles d’un livre."""
+    volume = item.get("volumeInfo", {})
 
-        book_data.append({
-            "Titre": book.get("title", "N/A"),
-            "Auteur": ", ".join([a["name"] for a in book.get("authors", [{"name": "Inconnu"}])]),
-            "Genre": subject.replace("_", " ").title(),
-            "Date_Publication": book.get("first_publish_year", ""),
-            "Editeur": "Inconnu",
-            "Resume": details["Resume"],
-            "Nombre_Pages": details["Nombre_Pages"],
-            "URL_Couverture": f"https://covers.openlibrary.org/b/id/{book.get('cover_id', '')}-L.jpg" if book.get("cover_id") else "",
-        })
+    return {
+        "Titre": volume.get("title", "Titre inconnu"),
+        "Auteur": ", ".join(volume.get("authors", ["Inconnu"])),
+        "Genre": ", ".join(volume.get("categories", ["Inconnu"])),
+        "Resume": volume.get("description", "Résumé non disponible"),
+        "Date_Publication": volume.get("publishedDate", ""),
+        "Editeur": volume.get("publisher", "Inconnu"),
+        "Nombre_Pages": volume.get("pageCount", 0),
+        "URL_Couverture": volume.get("imageLinks", {}).get("thumbnail", ""),
+        "ISBN": extract_isbn(volume.get("industryIdentifiers", [])),
+    }
 
-    print(f"✅ {len(book_data)} livres récupérés pour le sujet '{subject}'")
-    return book_data
+def extract_isbn(identifiers):
+    """Extrait un ISBN s’il existe."""
+    for id in identifiers:
+        if id.get("type") in ["ISBN_13", "ISBN_10"]:
+            return id.get("identifier")
+    return ""
+
+def livre_deja_present(conn, titre, auteur):
+    """Vérifie si un livre est déjà en base par titre et auteur."""
+    cursor = conn.cursor()
+    cursor.execute("SELECT 1 FROM Livres WHERE Titre = ? AND Auteur = ?", (titre, auteur))
+    return cursor.fetchone() is not None
 
 def insert_books(books):
-    if not books:
-        print("⚠️ Aucun livre à insérer.")
-        return
-    
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
+    livres_inserts = []
+    titres_auteurs_seen = set()
 
-    cursor.executemany("""
-        INSERT OR IGNORE INTO Livres 
-        (Titre, Auteur, Genre, Date_Publication, Editeur, Resume, Nombre_Pages, URL_Couverture)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, [(b["Titre"], b["Auteur"], b["Genre"], b["Date_Publication"], b["Editeur"], 
-           b["Resume"], b["Nombre_Pages"], b["URL_Couverture"]) for b in books])
+    for b in books:
+        key = (b["Titre"], b["Auteur"])
 
-    conn.commit()
+        if key in titres_auteurs_seen:
+            continue  # doublon dans la même session
+
+        if not livre_deja_present(conn, b["Titre"], b["Auteur"]):
+            livres_inserts.append((
+                b["Titre"], b["Auteur"], b["Genre"], b["Resume"],
+                b["Date_Publication"], b["Editeur"],
+                b["Nombre_Pages"], b["URL_Couverture"], b["ISBN"]
+            ))
+            titres_auteurs_seen.add(key)
+        else:
+            print(f"⏭️ Livre déjà en base : {b['Titre']} — {b['Auteur']}")
+
+    if livres_inserts:
+        cursor.executemany("""
+            INSERT INTO Livres 
+            (Titre, Auteur, Genre, Resume, Date_Publication, Editeur, Nombre_Pages, URL_Couverture, ISBN)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, livres_inserts)
+        conn.commit()
+        print(f"✅ {len(livres_inserts)} nouveaux livres insérés dans la base !")
+    else:
+        print("⚠️ Aucun nouveau livre à insérer.")
+
     conn.close()
-    print(f"📚 {len(books)} livres insérés avec succès dans la base !")
+
 
 if __name__ == "__main__":
     all_books = []
-    
-    for genre in GENRES:
-        print(f"📚 Récupération des livres pour le genre : {genre}")
-        books = fetch_books_by_subject(genre)
+
+    for start in range(START_INDEX, START_INDEX + TOTAL_RESULTS, MAX_RESULTS):
+        print(f"📚 Récupération des livres à partir de {start}...")
+        raw_books = fetch_books_from_google(start)
+        books = [extract_book_data(b) for b in raw_books]
         all_books.extend(books)
-        time.sleep(1)  # 🔄 Pause pour éviter d’être bloqué
 
     if all_books:
         insert_books(all_books)
-        print(f"🎉 Base de données mise à jour avec {len(all_books)} livres populaires !")
     else:
-        print("⚠️ Aucun livre ajouté.")
+        print("⚠️ Aucun livre récupéré.")

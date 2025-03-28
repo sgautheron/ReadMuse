@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchLivres } from "../api/livres";
 import { Box } from "@mui/material";
 import { Link } from "react-router-dom";
-import "../styles/Livres.css"; 
+import "../styles/Livres.css";
 
 const Livres = () => {
   const [livres, setLivres] = useState([]);
@@ -53,22 +53,22 @@ const Livres = () => {
         <Box key={index} className="shelf-container">
           {/* 📚 Livres */}
           <Box className="book-row">
-          {rangée.map((livre, idx) => (
-  <Box
-  key={livre ? `livre-${livre.ID_Livre}-${index}-${idx}` : `vide-${index}-${idx}`}
-  className="book-item"
-  >
-    {livre ? (
-      <Link to={`/livre/${livre.ID_Livre}`} className="book-link">
-        {livre.URL_Couverture && (
-          <img src={livre.URL_Couverture} alt={livre.Titre} className="book-cover" />
-        )}
-      </Link>
-    ) : (
-      <div className="book-placeholder"></div>
-    )}
-  </Box>
-))}
+            {rangée.map((livre, idx) => (
+              <Box
+                key={livre ? `livre-${livre.ID_Livre}-${index}-${idx}` : `vide-${index}-${idx}`}
+                className="book-item"
+              >
+                {livre ? (
+                  <Link to={`/livre/${livre.ID_Livre}`} className="book-link">
+                    {livre.URL_Couverture && (
+                      <img src={livre.URL_Couverture} alt={livre.Titre} className="book-cover" />
+                    )}
+                  </Link>
+                ) : (
+                  <div className="book-placeholder"></div>
+                )}
+              </Box>
+            ))}
           </Box>
           <Box className="shelf" style={{ width: `${livresParRangée * 150}px` }}></Box>
         </Box>
