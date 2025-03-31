@@ -7,9 +7,13 @@ import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import HistoryIcon from "@mui/icons-material/History";
 import InfoIcon from "@mui/icons-material/Info";
 import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import LoginIcon from "@mui/icons-material/Login";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useUser } from "../context/UserContext"; // ✅
 
 function Navbar() {
   const theme = useTheme();
+  const { utilisateur, setUtilisateur } = useUser(); // ✅
 
   return (
     <AppBar
@@ -21,6 +25,7 @@ function Navbar() {
       }}
     >
       <Toolbar sx={{ justifyContent: "space-between" }}>
+        {/* Logo + Titre */}
         <Box display="flex" alignItems="center">
           <IconButton edge="start" color="inherit" aria-label="logo" component={Link} to="/">
             <LibraryBooksIcon />
@@ -47,6 +52,28 @@ function Navbar() {
           <Button startIcon={<InfoIcon />} component={Link} to="/about">
             À Propos
           </Button>
+        </Box>
+
+        {/* ✅ Connexion / Déconnexion */}
+        <Box display="flex" alignItems="center" gap={2}>
+          {utilisateur ? (
+            <>
+              <Typography variant="body2" sx={{ fontWeight: "bold" }}>
+                Bonjour, {utilisateur.Nom}
+              </Typography>
+              <Button
+                startIcon={<LogoutIcon />}
+                color="inherit"
+                onClick={() => setUtilisateur(null)}
+              >
+                Déconnexion
+              </Button>
+            </>
+          ) : (
+            <Button startIcon={<LoginIcon />} color="inherit" component={Link} to="/login">
+              Connexion
+            </Button>
+          )}
         </Box>
       </Toolbar>
     </AppBar>

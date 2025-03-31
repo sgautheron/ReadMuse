@@ -28,9 +28,7 @@ class Interaction(Base):
     ID_Livre = Column(Integer, ForeignKey("Livres.ID_Livre"))
     Note = Column(Integer)
     Date_Interaction = Column(DateTime, default=func.now())
-    Style = Column(Text)
-    Intrigue = Column(Text)
-    Theme = Column(Text)
+    Description = Column(Text)
 
     # ✅ Relation vers Livre (chaque interaction est liée à un livre)
     livre = relationship("Livre", back_populates="interactions")
@@ -41,13 +39,9 @@ class Utilisateur(Base):
     __tablename__ = "Utilisateurs"
 
     ID_Utilisateur = Column(Integer, primary_key=True, index=True)
-    Nom = Column(String(100))
+    Nom = Column(String(100), nullable=False) 
     Email = Column(String(255), unique=True, nullable=False)
-    Date_Inscription = Column(DateTime, default=func.now())
-    Preferences_Declarees = Column(Text)
-    Commentaires_Textuels = Column(Text)
-    Score_Satisfaction = Column(Integer)
-    Derniere_Connexion = Column(DateTime)
+    Mot_De_Passe = Column(String(100), nullable=False)  
 
     # ✅ Relation avec les interactions
     interactions = relationship("Interaction", back_populates="utilisateur")

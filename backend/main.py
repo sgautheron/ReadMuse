@@ -8,7 +8,15 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 from backend.models import Interaction
 from typing import Optional
-
+import sqlite3
+from backend.recommendation import recommander_livres
+from fastapi import FastAPI
+from pydantic import BaseModel
+import sqlite3
+from backend.recommendation import recommander_livres
+from backend.schemas import InteractionCreate, Description
+from backend.auth import auth_router
+from backend.database import get_db
 
 
 # Création des tables si elles n'existent pas
@@ -16,6 +24,7 @@ Base.metadata.create_all(bind=engine)
 
 # Initialisation de FastAPI
 app = FastAPI()
+app.include_router(auth_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -25,13 +34,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Dépendance pour récupérer une session DB
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 # ✅ Route pour récupérer tous les livres
 @app.get("/livres/", response_model=List[dict])
@@ -52,6 +54,72 @@ def get_livres(db: Session = Depends(get_db)):
         } 
         for b in livres
     ]
+
+
+
+
+class InteractionCreate(BaseModel):
+    ID_Utilisateur: int = Field(..., alias="ID_Utilisateur")
+    ID_Livre: int = Field(..., alias="ID_Livre")
+    Note: Optional[int] = None 
+    Description: str = Field(..., alias="Description")
+
+    class Config:
+        allow_population_by_field_name = True
+
+# ✅ Route pour enregistrer une interaction
+@app.post("/interactions/")
+def create_interaction(interaction: InteractionCreate, db: Session = Depends(get_db)):
+    new_interaction = Interaction(
+        ID_Utilisateur=interaction.ID_Utilisateur,
+        ID_Livre=interaction.ID_Livre,
+        Note=interaction.Note,
+        Date_Interaction=datetime.now(),
+        Description=interaction.Description,
+    )
+    db.add(new_interaction)
+    db.commit()
+    db.refresh(new_interaction)
+    return {"message": "Interaction enregistrée avec succès", "id": new_interaction.ID_Interaction}
+
+
+# ✅ Route d'accueil
+@app.get("/")
+def home():
+    return {"message": "Bienvenue sur l'API ReadMuse !"}
+
+
+@app.get("/livres/par_categorie")
+def get_livres_par_categorie():
+    conn = sqlite3.connect("data/bdd_readmuse.db")
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM Livres")
+    livres = cursor.fetchall()
+
+    # Regroupe les livres par catégorie
+    categories = {}
+    for livre in livres:
+        categorie = livre[11] if livre[11] else "Autres"  # Index de ta colonne Catégorie
+        if categorie not in categories:
+            categories[categorie] = []
+        categories[categorie].append({
+            "ID_Livre": livre[0],
+            "Titre": livre[1],
+            "Auteur": livre[2],
+            "Genre": livre[3],
+            "Genre": livre[4],
+            "Resume": livre[5],
+            "Date_Publication": livre[6],
+            "Editeur": livre[7],
+            "Nombre_Pages": livre[8],
+            "URL_Couverture": livre[9],
+            "ISBN": livre[10]
+        })
+
+    conn.close()
+    return categories
+
 
 # ✅ Route pour récupérer un livre par ID
 @app.get("/livres/{id}", response_model=dict)
@@ -79,36 +147,12 @@ def get_livre(id: int, db: Session = Depends(get_db)):
     return livre_dict
 
 
-class InteractionCreate(BaseModel):
-    ID_Utilisateur: int = Field(..., alias="ID_Utilisateur")
-    ID_Livre: int = Field(..., alias="ID_Livre")
-    Note: Optional[int] = None 
-    Style: str = Field(..., alias="Style")
-    Intrigue: str = Field(..., alias="Intrigue")
-    Theme: str = Field(..., alias="Theme")
+class Description(BaseModel):
+    texte: str
 
-    class Config:
-        allow_population_by_field_name = True
-
-# ✅ Route pour enregistrer une interaction
-@app.post("/interactions/")
-def create_interaction(interaction: InteractionCreate, db: Session = Depends(get_db)):
-    new_interaction = Interaction(
-        ID_Utilisateur=interaction.ID_Utilisateur,
-        ID_Livre=interaction.ID_Livre,
-        Note=interaction.Note,
-        Date_Interaction=datetime.now(),
-        Style=interaction.Style,
-        Intrigue=interaction.Intrigue,
-        Theme=interaction.Theme
-    )
-    db.add(new_interaction)
-    db.commit()
-    db.refresh(new_interaction)
-    return {"message": "Interaction enregistrée avec succès", "id": new_interaction.ID_Interaction}
-
-
-# ✅ Route d'accueil
-@app.get("/")
-def home():
-    return {"message": "Bienvenue sur l'API ReadMuse !"}
+@app.post("/api/recommander")
+def recommander(description: Description):
+    conn = sqlite3.connect("backend/bdd_readmuse.db")
+    recommandations = recommander_livres(description.texte, conn)
+    conn.close()
+    return {"recommandations": recommandations}

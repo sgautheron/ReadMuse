@@ -2,12 +2,9 @@ CREATE TABLE Utilisateurs (
     ID_Utilisateur INTEGER PRIMARY KEY AUTOINCREMENT,
     Nom VARCHAR(100) NOT NULL,
     Email VARCHAR(255) UNIQUE NOT NULL,
-    Date_Inscription DATE DEFAULT CURRENT_DATE,
-    Preferences_Declarees TEXT,
-    Commentaires_Textuels TEXT,
-    Score_Satisfaction INTEGER,
-    Derniere_Connexion TIMESTAMP
+    Mot_De_Passe VARCHAR(100) NOT NULL
 );
+
 
 CREATE TABLE Livres (
     ID_Livre INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -28,11 +25,12 @@ CREATE TABLE Interactions (
     ID_Utilisateur INTEGER NOT NULL,
     ID_Livre INTEGER NOT NULL,
     Note INTEGER,
-    Feedback TEXT,
     Date_Interaction TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    Description TEXT,  -- ✅ remplace "Feedback"
     FOREIGN KEY (ID_Utilisateur) REFERENCES Utilisateurs(ID_Utilisateur) ON DELETE CASCADE,
     FOREIGN KEY (ID_Livre) REFERENCES Livres(ID_Livre) ON DELETE CASCADE
 );
+
 
 CREATE TABLE Mots_Cles (
     ID_Mot_Cle INTEGER PRIMARY KEY AUTOINCREMENT,
