@@ -13,6 +13,7 @@ import Resultats from "./pages/Resultats";
 import Login from "./pages/Login";
 import { UserProvider } from "./context/UserContext";
 import Register from "./pages/Register"; // ✅ Import du composant
+import Recommandations from "./pages/Recommandations";
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
             <Route path="/resultats" element={<Resultats />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/recommandations" element={<Recommandations />} />
           </Routes>
         </UserProvider>
       </Router>

@@ -82,7 +82,8 @@ function Formulaire() {
         const recoData = await recoResponse.json();
 
         // Redirige vers /resultats avec les recommandations
-        navigate("/resultats", { state: { recommandations: recoData.recommandations } });
+        localStorage.setItem("recommandations", JSON.stringify(recoData.recommandations));
+        navigate("/recommandations", { state: { description } });
 
         setDescription("");
         setMessage("Vos préférences ont bien été enregistrées !");

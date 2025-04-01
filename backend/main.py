@@ -10,13 +10,11 @@ from backend.models import Interaction
 from typing import Optional
 import sqlite3
 from backend.recommendation import recommander_livres
-from fastapi import FastAPI
-from pydantic import BaseModel
-import sqlite3
 from backend.recommendation import recommander_livres
 from backend.schemas import InteractionCreate, Description
 from backend.auth import auth_router
 from backend.database import get_db
+from backend.recommendation import recommander_livres
 
 
 # Création des tables si elles n'existent pas
@@ -150,9 +148,10 @@ def get_livre(id: int, db: Session = Depends(get_db)):
 class Description(BaseModel):
     texte: str
 
+
+
 @app.post("/api/recommander")
-def recommander(description: Description):
-    conn = sqlite3.connect("backend/bdd_readmuse.db")
-    recommandations = recommander_livres(description.texte, conn)
-    conn.close()
+def recommander(description: Description, db: Session = Depends(get_db)):
+    recommandations = recommander_livres(description.texte, db)
     return {"recommandations": recommandations}
+
