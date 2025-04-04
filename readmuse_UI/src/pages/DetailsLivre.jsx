@@ -37,9 +37,9 @@ const DétailsLivre = () => {
         padding: 4,
         textAlign: "center",
         marginTop: "80px",
-        maxWidth: "800px", // ✅ Limite la largeur du contenu
-        marginLeft: "auto", // ✅ Centre horizontalement
-        marginRight: "auto", // ✅ Centre horizontalement
+        maxWidth: "800px",
+        marginLeft: "auto",
+        marginRight: "auto",
       }}
     >
       <Typography variant="h4" fontWeight="bold" gutterBottom>
@@ -89,6 +89,33 @@ const DétailsLivre = () => {
           <Typography variant="body2">
             <strong>Nombre de pages :</strong> {livre.Nombre_Pages}
           </Typography>
+
+          {/* ✅ Ajout des mots-clés dans l'onglet Détails */}
+          {livre.Mots_Cles && (
+            <>
+              <Typography variant="body2" sx={{ mt: 2 }}>
+                <strong>Mots-clés associés :</strong>
+              </Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
+                {livre.Mots_Cles.split(",").map((mot, index) => (
+                  <Link to={`/motcle/${mot.trim()}`} key={index}>
+                    <Paper
+                      sx={{
+                        px: 1.5,
+                        py: 0.5,
+                        backgroundColor: "#f0f0f0",
+                        borderRadius: "999px",
+                        fontSize: "0.85rem",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {mot.trim()}
+                    </Paper>
+                  </Link>
+                ))}
+              </Box>
+            </>
+          )}
         </Box>
       ) : (
         <Box sx={{ maxWidth: "600px", margin: "auto", textAlign: "left" }}>

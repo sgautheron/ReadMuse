@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 
 import { useTheme } from "@mui/material/styles";
-import { fetchLivres } from "../api/livres";
+import { fetchLivresParPopularite } from "../api/livres";
 import { useNavigate } from "react-router-dom";
 
 function Formulaire() {
@@ -23,13 +23,11 @@ function Formulaire() {
   const [selectedLivre, setSelectedLivre] = useState(null);
   const [description, setDescription] = useState("");
   const [message, setMessage] = useState(null);
-  const [note, setNote] = useState("");
 
   useEffect(() => {
     const getLivres = async () => {
-      const data = await fetchLivres();
+      const data = await fetchLivresParPopularite();
       if (data && data.length > 0) {
-        // ➕ Élimine les doublons de titre (en gardant le premier pour chaque titre)
         const titresUniquesMap = new Map();
         data.forEach((livre) => {
           const titreCle = livre.Titre.toLowerCase().trim();
@@ -38,9 +36,7 @@ function Formulaire() {
           }
         });
 
-        const livresUniques = Array.from(titresUniquesMap.values()).sort((a, b) =>
-          a.Titre.localeCompare(b.Titre)
-        );
+        const livresUniques = Array.from(titresUniquesMap.values());
 
         const auteursUniques = [...new Set(data.map((livre) => livre.Auteur))].sort();
 
@@ -59,12 +55,11 @@ function Formulaire() {
     const preferenceData = {
       ID_Utilisateur: 1,
       ID_Livre: selectedLivre.ID_Livre,
-      Note: note ? parseInt(note) : null,
+      Note: null,
       Description: description,
     };
 
     try {
-      // Envoie des préférences
       const response = await fetch("http://127.0.0.1:8000/interactions/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,7 +67,6 @@ function Formulaire() {
       });
 
       if (response.ok) {
-        // Appel à l'API de recommandations
         const recoResponse = await fetch("http://127.0.0.1:8000/api/recommander", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -80,8 +74,6 @@ function Formulaire() {
         });
 
         const recoData = await recoResponse.json();
-
-        // Redirige vers /resultats avec les recommandations
         localStorage.setItem("recommandations", JSON.stringify(recoData.recommandations));
         navigate("/recommandations", { state: { description } });
 
@@ -109,7 +101,7 @@ function Formulaire() {
     >
       <Paper
         elevation={3}
-        sx={{ width: { xs: "90%", sm: "70%", md: "50%" }, padding: 4, borderRadius: 3 }}
+        sx={{ width: { xs: "90%", sm: "70%", md: "60%" }, padding: 4, borderRadius: 3 }}
       >
         <Typography variant="h4" fontWeight="bold" color="primary" textAlign="center">
           Partagez vos Préférences
@@ -154,27 +146,32 @@ function Formulaire() {
             />
           </Grid>
 
+          {/* 🧠 Exemple */}
           <Grid item xs={12}>
             <TextField
               fullWidth
+              multiline
+              minRows={6}
               label="Pourquoi avez-vous aimé ce livre ?"
               variant="outlined"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Parlez-nous de l'univers, du style, de l'intrigue, des émotions..."
             />
-          </Grid>
-
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Note sur 5"
-              variant="outlined"
-              type="number"
-              inputProps={{ min: 1, max: 5 }}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+              <strong>Exemple :</strong> J’ai adoré ce livre pour son univers riche et immersif. Les
+              personnages sont bien développés, l’écriture est fluide et poétique, et j’ai été
+              happée par le suspense jusqu’à la fin.
+            </Typography>
+            <Typography
+              variant="body2"
+              color="warning.main"
+              sx={{ mb: 2, fontStyle: "italic", display: "flex", alignItems: "center", gap: 1 }}
+            >
+              ⚠️ Conseil : Essayez d’être précis. Évitez « Ce livre est super, j’ai adoré les
+              personnages », et préférez des détails sur l’écriture, l’univers ou les émotions
+              ressenties.
+            </Typography>
           </Grid>
         </Grid>
 

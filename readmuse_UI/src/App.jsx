@@ -9,17 +9,18 @@ import Exploration from "./pages/Exploration";
 import Historique from "./pages/Historique";
 import About from "./pages/About";
 import DetailsLivre from "./pages/DetailsLivre";
-import Resultats from "./pages/Resultats";
 import Login from "./pages/Login";
-import { UserProvider } from "./context/UserContext";
-import Register from "./pages/Register"; // ✅ Import du composant
+import Register from "./pages/Register";
 import Recommandations from "./pages/Recommandations";
+import PageMotCle from "./pages/PageMotCle";
+import ExplorationMotsCles from "./pages/ExplorationMotsCles"; // ✅ bon import
+
+import { UserProvider } from "./context/UserContext";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-
       <Router>
         <UserProvider>
           <Navbar />
@@ -30,10 +31,11 @@ function App() {
             <Route path="/historique" element={<Historique />} />
             <Route path="/about" element={<About />} />
             <Route path="/livre/:id" element={<DetailsLivre />} />
-            <Route path="/resultats" element={<Resultats />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/recommandations" element={<Recommandations />} />
+            <Route path="/motcle/:tag" element={<PageMotCle />} />
+            <Route path="/motscles" element={<ExplorationMotsCles />} /> {/* ✅ correction ici */}
           </Routes>
         </UserProvider>
       </Router>

@@ -22,9 +22,15 @@ function Navbar() {
         bgcolor: theme.palette.background.default,
         width: "100%",
         color: theme.palette.text.navbar,
+        zIndex: (theme) => theme.zIndex.drawer + 1, // ✅ pour rester au-dessus
       }}
     >
-      <Toolbar sx={{ justifyContent: "space-between" }}>
+      <Toolbar
+        sx={{
+          justifyContent: "space-between",
+          minHeight: 64, // ✅ assure une hauteur constante
+        }}
+      >
         {/* Logo + Titre */}
         <Box display="flex" alignItems="center">
           <IconButton edge="start" color="inherit" aria-label="logo" component={Link} to="/">
@@ -46,6 +52,9 @@ function Navbar() {
           <Button startIcon={<AutoStoriesIcon />} component={Link} to="/exploration">
             Exploration
           </Button>
+          <Button startIcon={<LibraryBooksIcon />} component={Link} to="/motscles">
+            Mots-Clés
+          </Button>
           <Button startIcon={<HistoryIcon />} component={Link} to="/historique">
             Historique
           </Button>
@@ -54,7 +63,7 @@ function Navbar() {
           </Button>
         </Box>
 
-        {/* ✅ Connexion / Déconnexion */}
+        {/* Connexion / Déconnexion */}
         <Box display="flex" alignItems="center" gap={2}>
           {utilisateur ? (
             <>

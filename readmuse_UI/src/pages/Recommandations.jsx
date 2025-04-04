@@ -20,7 +20,7 @@ function Recommendations() {
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h4" mb={3}>
-        Vos recommandations 📚
+        Vos recommandations
       </Typography>
 
       {description && (
@@ -51,7 +51,7 @@ function Recommendations() {
 
                 <Divider sx={{ my: 1 }} />
 
-                {/* 🌈 Affichage des thèmes partagés regroupés */}
+                {/* Affichage des thèmes partagés regroupés */}
                 {livre.themes_partagés &&
                   Object.entries(livre.themes_partagés).map(([theme, mots]) => (
                     <Box key={theme} sx={{ mb: 1 }}>

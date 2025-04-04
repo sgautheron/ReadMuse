@@ -61,3 +61,13 @@
   max-width: 90vw;
   margin-top: -5px;
 }
+
+/* ✅ Fix de calque pour éviter que les livres passent au-dessus du header */
+.library-container {
+  position: relative;
+  z-index: 0;
+}
+
+.book-cover {
+  z-index: 1;
+}

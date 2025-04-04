@@ -49,3 +49,21 @@ export const fetchReviewsByBookId = async (id) => {
     return [];
   }
 };
+
+export const fetchLivresParPopularite = async () => {
+  try {
+    console.log("📡 Récupération des livres populaires...");
+    const response = await fetch("http://127.0.0.1:8000/livres/populaires");
+
+    if (!response.ok) {
+      throw new Error(`Erreur API: ${response.status} - ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log("🔥 Livres triés par popularité :", data);
+    return data;
+  } catch (error) {
+    console.error("❌ Erreur lors de la récupération des livres populaires :", error);
+    return [];
+  }
+};

@@ -119,7 +119,20 @@ def get_livres_par_categorie():
     return categories
 
 
-# ✅ Route pour récupérer un livre par ID
+@app.get("/livres/populaires")
+def get_livres_par_popularite():
+    conn = sqlite3.connect("data/bdd_readmuse.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM LivresParPopularite")
+    livres = cursor.fetchall()
+
+    conn.close()
+    return [dict(livre) for livre in livres]
+
+
+# Route pour récupérer un livre par ID
 @app.get("/livres/{id}", response_model=dict)
 def get_livre(id: int, db: Session = Depends(get_db)):
     livre = db.query(Livre).filter(Livre.ID_Livre == id).first()
@@ -154,4 +167,25 @@ class Description(BaseModel):
 def recommander(description: Description, db: Session = Depends(get_db)):
     recommandations = recommander_livres(description.texte, db)
     return {"recommandations": recommandations}
+
+
+
+@app.get("/livres/motcle/{tag}", response_model=List[dict])
+def get_livres_par_mot_cle(tag: str, db: Session = Depends(get_db)):
+    tag = tag.strip().lower()
+    livres = db.query(Livre).filter(Livre.Mots_Cles.ilike(f"%{tag}%")).all()
+
+    if not livres:
+        raise HTTPException(status_code=404, detail="Aucun livre trouvé pour ce mot-clé.")
+
+    return [
+        {
+            "ID_Livre": livre.ID_Livre,
+            "Titre": livre.Titre,
+            "Auteur": livre.Auteur,
+            "URL_Couverture": livre.URL_Couverture,
+            "Mots_Cles": livre.Mots_Cles,
+        }
+        for livre in livres
+    ]
 
