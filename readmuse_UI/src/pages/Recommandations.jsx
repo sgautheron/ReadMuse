@@ -18,10 +18,8 @@ function Recommendations() {
   }, [location]);
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Typography variant="h4" mb={3}>
-        Vos recommandations
-      </Typography>
+    <Box sx={{ p: 10 }}>
+      <Typography variant="h4" mb={3}></Typography>
 
       {description && (
         <>
@@ -80,3 +78,5 @@ function Recommendations() {
 }
 
 export default Recommendations;
+
+//auteur, clic, image, clic sur les mots clés, message pour inciter à se connecter

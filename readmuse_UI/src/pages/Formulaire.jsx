@@ -10,10 +10,10 @@ import {
   Autocomplete,
   Alert,
 } from "@mui/material";
-
 import { useTheme } from "@mui/material/styles";
 import { fetchLivresParPopularite } from "../api/livres";
 import { useNavigate } from "react-router-dom";
+import backgroundImage from "../assets/bibliotheque.jpg";
 
 function Formulaire() {
   const theme = useTheme();
@@ -35,11 +35,8 @@ function Formulaire() {
             titresUniquesMap.set(titreCle, livre);
           }
         });
-
         const livresUniques = Array.from(titresUniquesMap.values());
-
         const auteursUniques = [...new Set(data.map((livre) => livre.Auteur))].sort();
-
         setLivres(livresUniques);
         setAuteurs(auteursUniques);
       }
@@ -48,10 +45,7 @@ function Formulaire() {
   }, []);
 
   const handleSubmit = async () => {
-    if (!selectedLivre || !description.trim()) {
-      return;
-    }
-
+    if (!selectedLivre || !description.trim()) return;
     const preferenceData = {
       ID_Utilisateur: 1,
       ID_Livre: selectedLivre.ID_Livre,
@@ -72,11 +66,9 @@ function Formulaire() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ texte: description }),
         });
-
         const recoData = await recoResponse.json();
         localStorage.setItem("recommandations", JSON.stringify(recoData.recommandations));
         navigate("/recommandations", { state: { description } });
-
         setDescription("");
         setMessage("Vos préférences ont bien été enregistrées !");
       } else {
@@ -91,17 +83,25 @@ function Formulaire() {
   return (
     <Box
       sx={{
-        minHeight: "120vh",
+        minHeight: "100vh",
         display: "flex",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "center",
-        backgroundColor: theme.palette.background.default,
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
         padding: 4,
+        pt: 15,
       }}
     >
       <Paper
         elevation={3}
-        sx={{ width: { xs: "90%", sm: "70%", md: "60%" }, padding: 4, borderRadius: 3 }}
+        sx={{
+          width: { xs: "90%", sm: "70%", md: "60%" },
+          padding: 4,
+          borderRadius: 3,
+          backgroundColor: theme.palette.background.default,
+        }}
       >
         <Typography variant="h4" fontWeight="bold" color="primary" textAlign="center">
           Partagez vos Préférences
@@ -146,7 +146,6 @@ function Formulaire() {
             />
           </Grid>
 
-          {/* 🧠 Exemple */}
           <Grid item xs={12}>
             <TextField
               fullWidth
@@ -163,14 +162,9 @@ function Formulaire() {
               personnages sont bien développés, l’écriture est fluide et poétique, et j’ai été
               happée par le suspense jusqu’à la fin.
             </Typography>
-            <Typography
-              variant="body2"
-              color="warning.main"
-              sx={{ mb: 2, fontStyle: "italic", display: "flex", alignItems: "center", gap: 1 }}
-            >
-              ⚠️ Conseil : Essayez d’être précis. Évitez « Ce livre est super, j’ai adoré les
-              personnages », et préférez des détails sur l’écriture, l’univers ou les émotions
-              ressenties.
+            <Typography variant="body2" color="warning.main" sx={{ mb: 2, fontStyle: "italic" }}>
+              ⚠️ Conseil : Essayez d’être précis. Évitez « Ce livre est super », et préférez des
+              détails sur l’écriture, l’univers ou les émotions ressenties.
             </Typography>
           </Grid>
         </Grid>

@@ -31,7 +31,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     return {"id": user.ID_Utilisateur, "message": "Connexion réussie"}
 
 @auth_router.post("/utilisateurs/login")
-def login_user(user: UtilisateurCreate, db: Session = Depends(get_db)):
+def login_user(user: LoginRequest, db: Session = Depends(get_db)):
     db_user = db.query(Utilisateur).filter(Utilisateur.Email == user.Email).first()
     if not db_user or db_user.Mot_De_Passe != user.Mot_De_Passe:
         raise HTTPException(status_code=401, detail="Email ou mot de passe incorrect")

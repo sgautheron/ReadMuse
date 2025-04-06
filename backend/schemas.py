@@ -1,6 +1,6 @@
-from pydantic import BaseModel
 from pydantic import BaseModel, Field
 from typing import Optional
+from datetime import datetime
 
 class UtilisateurCreate(BaseModel):
     Nom: str
@@ -23,3 +23,25 @@ class InteractionCreate(BaseModel):
 class Description(BaseModel):
     texte: str
 
+from pydantic import BaseModel
+from datetime import datetime
+
+class InteractionOut(BaseModel):
+    ID_Interaction: int
+    Titre: str
+    Description: str
+    Date_Interaction: datetime
+
+    class Config:
+        orm_mode = True
+
+
+from datetime import date
+
+class ReviewOut(BaseModel):
+    utilisateur: str
+    commentaire: str
+    date: date
+
+    class Config:
+        orm_mode = True

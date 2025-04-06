@@ -2,6 +2,7 @@ import requests
 import sqlite3
 import time
 import os
+from datetime import datetime
 
 # 🔐 Clé API Google Books
 API_KEY = "AIzaSyAkiZ59B6x_NGhmcC1Emvd3lc1IfgHbNO4"
@@ -10,34 +11,23 @@ API_KEY = "AIzaSyAkiZ59B6x_NGhmcC1Emvd3lc1IfgHbNO4"
 DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data/bdd_readmuse.db"))
 
 # 📊 Paramètres API
-MAX_RESULTS = 40  # Maximum autorisé par requête Google Books
+MAX_RESULTS = 40
 
-# 🔖 Liste des catégories à scraper
-CATEGORIES = {
-    "adaptés au cinéma" : "adaptés au cinéma",
-    "adaptés en série" : "adaptés en série",
-    "adaptés sur Netflix" : "adaptés sur Netflix",
-    "Marc Levy" : "Marc Levy",
-    "Gustave Flaubert" : "Gustave Flaubert",
-    "Proust" : "Proust",
-    "Stendhal" : "Stendhal",
-    "favoris des lecteurs" : "favoris des lecteurs",
-    "favoris des libraires" : "favoris des libraires",
-    "Antoine de Saint-Exupéry" : "Antoine de Saint-Exupéry",
-    "Romain Gary" : "Romain Gary",
-    "George Sand" : "George Sand",
-    "top auteurs" : "top auteurs",
-    "lecture du moment" : "lecture du moment"
-
-
+# 🔖 Requêtes tendances pour les livres populaires actuels en France
+TRENDING_QUERIES = {
+    "Nouveautés 2024": "nouveautés littéraires 2024",
+    "Best-sellers France": "best sellers romans France 2024",
+    "Romans du moment": "romans qui font parler 2024",
+    "Prix littéraires": "Goncourt Renaudot Interallié Femina 2024",
+    "Écrivains médiatisés": "Nicolas Demorand Amélie Nothomb Virginie Despentes"
 }
 
-# Récupération depuis Google Books
 
+# 🔍 Récupération des livres depuis l'API
 def fetch_books_from_google(query, category):
     url = (
-        f"https://www.googleapis.com/books/v1/volumes?q={query}" 
-        f"&maxResults={MAX_RESULTS}&langRestrict=fr&printType=books&key={API_KEY}"
+        f"https://www.googleapis.com/books/v1/volumes?q={query}"
+        f"&maxResults={MAX_RESULTS}&langRestrict=fr&printType=books&orderBy=newest&key={API_KEY}"
     )
     try:
         response = requests.get(url)
@@ -48,8 +38,8 @@ def fetch_books_from_google(query, category):
         print(f"⚠️ Erreur API pour '{query}': {e}")
         return []
 
-# 🧠 Extraction des données
 
+# 🧠 Extraction des données
 def extract_book_data(item, category):
     volume = item.get("volumeInfo", {})
     return {
@@ -65,18 +55,20 @@ def extract_book_data(item, category):
         "Categorie": category
     }
 
+
 def extract_isbn(identifiers):
     for id in identifiers:
         if id.get("type") in ["ISBN_13", "ISBN_10"]:
             return id.get("identifier")
     return ""
 
-# 📥 Insertion en base
 
+# 📥 Insertion en base de données
 def livre_deja_present(conn, titre, auteur):
     cursor = conn.cursor()
     cursor.execute("SELECT 1 FROM Livres WHERE Titre = ? AND Auteur = ?", (titre, auteur))
     return cursor.fetchone() is not None
+
 
 def insert_books(books):
     conn = sqlite3.connect(DATABASE_PATH)
@@ -103,17 +95,19 @@ def insert_books(books):
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, livres_inserts)
         conn.commit()
-        print(f"✅ {len(livres_inserts)} livres insérés !")
+        print(f"✅ {len(livres_inserts)} livres insérés dans la base.")
     else:
         print("⚠️ Aucun nouveau livre à insérer.")
 
     conn.close()
 
-# 🚀 Main
 
+# 🚀 Script principal
 if __name__ == "__main__":
-    for category, query in CATEGORIES.items():
-        print(f"\n🔍 Catégorie : {category} → Recherche : '{query}'")
+    for category, query in TRENDING_QUERIES.items():
+        print(f"\n🔍 Catégorie : {category} → Requête : '{query}'")
         books = fetch_books_from_google(query, category)
         if books:
             insert_books(books)
+        else:
+            print(f"❌ Aucun livre trouvé pour : {query}")

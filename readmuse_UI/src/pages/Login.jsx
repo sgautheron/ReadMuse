@@ -1,4 +1,3 @@
-// pages/Login.jsx
 import { useState } from "react";
 import { TextField, Button, Box, Typography, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +11,7 @@ function Login() {
   const { utilisateur, setUtilisateur } = useUser();
 
   if (utilisateur) {
-    navigate("/profil"); // ou / si tu préfères
+    navigate("/profil");
   }
 
   const handleLogin = async () => {
@@ -29,19 +28,34 @@ function Login() {
       }
 
       const data = await res.json();
-
-      // 💾 Stocke l’utilisateur en localStorage
       localStorage.setItem("utilisateur", JSON.stringify(data.utilisateur));
-      setUtilisateur(data.utilisateur); // ← ici !
-      navigate("/profil"); // ou accueil si tu préfères
+      setUtilisateur(data.utilisateur);
+      navigate("/profil");
     } catch (err) {
       setErreur("Erreur lors de la connexion.");
     }
   };
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-      <Paper elevation={3} sx={{ p: 4, width: 400 }}>
+    <Box
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "100%",
+        maxWidth: 400,
+        px: 2,
+      }}
+    >
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          borderRadius: 3,
+          width: "100%",
+        }}
+      >
         <Typography variant="h5" mb={2} textAlign="center">
           Connexion
         </Typography>

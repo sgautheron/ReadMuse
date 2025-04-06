@@ -1,4 +1,3 @@
-// pages/Register.jsx
 import { useState } from "react";
 import { TextField, Button, Box, Typography, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -25,17 +24,26 @@ function Register() {
       }
 
       const data = await res.json();
-      // Tu peux directement connecter l'utilisateur après inscription
       localStorage.setItem("utilisateur", JSON.stringify(data.utilisateur));
-      navigate("/login"); // Ou /profil si tu veux connecter direct
+      navigate("/login");
     } catch (err) {
       setErreur("Erreur lors de l'inscription.");
     }
   };
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", mt: 8 }}>
-      <Paper elevation={3} sx={{ p: 4, width: 400 }}>
+    <Box
+      sx={{
+        position: "absolute",
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)",
+        width: "100%",
+        maxWidth: 400,
+        px: 2,
+      }}
+    >
+      <Paper elevation={3} sx={{ p: 4, width: 400, maxWidth: "100%" }}>
         <Typography variant="h5" mb={2} textAlign="center">
           Inscription
         </Typography>

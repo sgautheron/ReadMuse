@@ -82,7 +82,7 @@ const Exploration = () => {
           sx={{
             display: "flex",
             gap: 2,
-            justifyContent: "flex-start", // ✅ aligné à gauche
+            justifyContent: "flex-start",
             flexWrap: "wrap",
           }}
         >
@@ -106,7 +106,7 @@ const Exploration = () => {
         </Box>
       </Box>
 
-      {/* 🔎 Résultats filtrés */}
+      {/* Résultats filtrés */}
       {filtreCategorie || filtreTitre ? (
         <Box>
           <Typography variant="h5" fontWeight="bold" mb={2}>

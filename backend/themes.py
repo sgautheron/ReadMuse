@@ -4,11 +4,12 @@ themes = {
         "enquête", "révélation", "secret", "intrigue", "tension", "drame", "complots",
         "imprévisible", "intrigant", "dénouement", "arc narratif", "quête", "vengeance",
         "manipulation", "quête initiatique", "complexité", "imbroglio", "narratif", 
-        "structurel", "mécanique narrative", "cliffhanger", "dévoilement", "enchaînement"
+        "structurel", "mécanique narrative", "cliffhanger", "dévoilement", "enchaînement", 
+        "plot twist", "innovant", "unique"
 
     ],
     "style": [
-        "écriture", "langage", "poétique", "fluide", "plume", "narration",
+        "langage", "poétique", "fluide", "plume", "narration",
         "description", "dialogue", "voix", "lyrique", "élégant", "percutant", "précis",
         "sarcastique", "ironique", "métaphore", "ton", "voix narrative", "élégance", 
         "raffiné", "brut", "brute", "lyrique", "rythmé", "immersif",
@@ -22,13 +23,13 @@ themes = {
         "émouvant", "triste", "joyeux", "touchant", "toucher", "sentimental", "intense", "angoissant",
         "douloureux", "choc", "sensible", "nostalgie", "larmes", "rire", "colère",
         "compassion", "solitude", "espoir", "désespoir", "bouleversant", "déchirant", 
-        "émotion", "ressenti", "sensibilité"
+        "émotion", "ressenti", "sensibilité", "passionant", 
     ],
     "univers": [
         "imaginaire", "réaliste", "historique", "futuriste", "fantastique", "dystopique",
         "mythologique", "surnaturel", "post-apocalyptique", "science-fiction", "steampunk",
-        "u-topie", "rétro", "cosmique", "spatial", "féérique", "cyberpunk", "médiéval", "dépaysement", 
-        "immersif", "originalité", "bulle", "réaliste magique"
+        "utopie", "rétro", "cosmique", "spatial", "féérique", "cyberpunk", "médiéval", "dépaysement", 
+        "immersif", "originalité", "bulle", "réaliste magique", 
     ],
     "personnages": [
         "attachant", "complexe", "psychologie", "relation", "héroïne", "protagoniste",
@@ -88,11 +89,11 @@ themes = {
     ],
     "culture": [
         "musique", "cinéma", "peinture", "photographie", "mode", "architecture",
-        "art", "danse", "littérature", "histoire de l'art", "création", "esthétique"
+        "art", "danse", "littérature", "histoire de l'art", "création", "esthétique", "voyage"
     ],
     "spiritualité": [
         "croyance", "foi", "religion", "dieu", "prière", "âme", "réincarnation",
-        "karma", "éveil", "transcendance", "illumination", "spirituel", "religieux"
+        "karma", "éveil", "transcendance", "illumination", "spirituel", "religieux", "ethnie"
     ],
     "structure": [
         "chapitres courts", "structure en miroir", "retour en arrière", "linéaire",
@@ -101,49 +102,43 @@ themes = {
     ],
     "humour": [
         "drôle", "humoristique", "satirique", "burlesque", "absurde", "comique",
-        "ironique", "décalé", "cynique", "sarcastique", "moqueur", "parodique", "mordant", "irrésitible"
+        "ironique", "décalé", "cynique", "sarcastique", "moqueur", "parodique", "mordant", 
+        "irrésitible"
     ],
     "genre et identité": [
-        "transidentité", "non-binarité", "LGBT", "LGBTQ+", "genre", "masculinité toxique", "homophobie", "transphobie"
+        "transidentité", "non-binarité", "LGBT", "LGBTQ+", "genre", "masculinité toxique", 
+        "homophobie", "transphobie"
     ],
     "Corps, santé et handicap": [
-        "grossophobie", "handicap", "validisme", "santé mentale", "psychologie", "addiction", "maladie"
+        "grossophobie", "handicap", "validisme", "santé mentale", "psychologie", "addiction", 
+        "maladie"
     ],
     "Migration, frontières, racines": [
-        "exil", "migration", "réfugié", "diaspora", "racines", "décolonisation", "immigration", "frontières" 
+        "exil", "migration", "réfugié", "diaspora", "racines", "décolonisation", "immigration", 
+        "frontières" 
     ],
     "Oppression & luttes": [
-        "colonialisme"
-"oppression"
-"censure"
-"domination"
-"rébellion"
-"marginalisation"
-"surveillance"],
-    "Économie, travail, société": ["inégalités"
-"travail"
-"exploitation"
-"chômage"
-"précarité"
-"aliénation"
-"révolte sociale"],
-    "Éducation & savoir": ["éducation"
-"savoir"
-"ignorance"
-"instruction"
-"transmission"],
-    "Technologie & société": ["intelligence artificielle", "IA", "robot"
-"surveillance numérique"
-"transhumanisme"
-"réseaux sociaux"
-"cybersociété"
-"dérives technologiques"],
-    "Justice & droit": ["injustice"
-"prison"
-"loi"
-"procès"
-"droits humains"
-"droits civiques"]
+        "colonialisme", "oppression", "censure", "domination","rébellion", "marginalisation", 
+        "surveillance"
+    ],
+    "Économie, travail, société": [
+        "inégalités", "travail", "exploitation", "chômage", "précarité", "aliénation", 
+        "révolte sociale"
+    ],
+    "Éducation & savoir": [
+        "éducation", "savoir", "ignorance", "instruction", "transmission"
+    ],
+    "Technologie & société": [
+        "intelligence artificielle", "IA", "robot", "surveillance numérique","transhumanisme", 
+        "réseaux sociaux", "cybersociété", "dérives technologiques"
+    ],
+    "Justice & droit": [
+        "injustice", "prison", "loi", "enquête", "procès", "droits", "crime", "délit"
+    ],
+    "Fantasie" : [
+        "féé", "dragon", "sorcier", "sorcière", "magie", "elfe", "pouvoir magique", "supernaturel", 
+        "titan", "alien", "extraterrestre", "vampire", "loup-garou", "magicien"
+    ]
 
 
 }
