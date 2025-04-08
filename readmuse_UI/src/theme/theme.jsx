@@ -38,6 +38,7 @@ const theme = createTheme({
           padding: "10px 24px",
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
           color: "#4B3F2F",
+          backgroundColor: "#fdfaf5",
           "&:hover": {
             backgroundColor: "#e7dcd1", // Hover beige plus foncé
             color: "#000",

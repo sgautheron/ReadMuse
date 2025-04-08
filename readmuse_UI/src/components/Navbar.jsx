@@ -20,6 +20,8 @@ function Navbar() {
       position="fixed"
       elevation={1}
       sx={{
+        px: { xs: 2, md: 4 }, // ✅ petites marges sur les côtés
+        py: 1, // marge verticale interne
         backdropFilter: "blur(6px)",
         backgroundColor: "rgba(245, 240, 230, 0.95)",
         color: theme.palette.text.navbar,
@@ -33,28 +35,17 @@ function Navbar() {
           <IconButton edge="start" color="inherit" aria-label="logo" component={Link} to="/">
             <LibraryBooksIcon />
           </IconButton>
-          <Typography
-            variant="h6"
-            fontWeight="bold"
-            sx={{ ml: 1, fontFamily: "'Poppins', sans-serif" }}
-          >
+          <Typography variant="h6" sx={{ ml: 1, fontFamily: "'Poppins', sans-serif" }}>
             ReadMuse
           </Typography>
         </Box>
 
         {/* Liens de navigation */}
         <Box display="flex" gap={3.5}>
-          <Button
-            variant="text"
-            startIcon={<HomeIcon />}
-            component={Link}
-            to="/"
-            sx={{ mt: 2, mb: 2 }}
-          >
+          <Button startIcon={<HomeIcon />} component={Link} to="/" sx={{ mt: 2, mb: 2 }}>
             Accueil
           </Button>
           <Button
-            variant="text"
             startIcon={<AssignmentIcon />}
             component={Link}
             to="/formulaire"
@@ -63,7 +54,6 @@ function Navbar() {
             Formulaire
           </Button>
           <Button
-            variant="text"
             startIcon={<AutoStoriesIcon />}
             component={Link}
             to="/exploration"
@@ -72,7 +62,6 @@ function Navbar() {
             Exploration
           </Button>
           <Button
-            variant="text"
             startIcon={<LibraryBooksIcon />}
             component={Link}
             to="/motscles"
@@ -81,13 +70,7 @@ function Navbar() {
             Mots-Clés
           </Button>
           {utilisateur && (
-            <Button
-              variant="text"
-              startIcon={<HistoryIcon />}
-              component={Link}
-              to="/profil"
-              sx={{ mt: 2, mb: 2 }}
-            >
+            <Button startIcon={<HistoryIcon />} component={Link} to="/profil" sx={{ mt: 2, mb: 2 }}>
               Profil
             </Button>
           )}
@@ -97,12 +80,8 @@ function Navbar() {
         <Box display="flex" alignItems="center" gap={2}>
           {utilisateur ? (
             <>
-              <Typography variant="body2" sx={{ fontWeight: "bold" }}>
-                Bonjour, {utilisateur.Nom}
-              </Typography>
               <Button
                 startIcon={<LogoutIcon />}
-                variant="text"
                 sx={{ mt: 2, mb: 2 }}
                 onClick={() => {
                   localStorage.removeItem("utilisateur");
@@ -113,13 +92,7 @@ function Navbar() {
               </Button>
             </>
           ) : (
-            <Button
-              startIcon={<LoginIcon />}
-              variant="text"
-              sx={{ mt: 2, mb: 2 }}
-              component={Link}
-              to="/login"
-            >
+            <Button startIcon={<LoginIcon />} sx={{ mt: 2, mb: 2 }} component={Link} to="/login">
               Connexion
             </Button>
           )}

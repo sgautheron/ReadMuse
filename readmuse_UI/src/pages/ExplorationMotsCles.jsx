@@ -54,6 +54,7 @@ function ExplorationMotsCles() {
   return (
     <Box
       sx={{
+        mt: 3,
         pt: 12,
         px: 4,
         backgroundColor: "#f5f0e6",
@@ -66,18 +67,17 @@ function ExplorationMotsCles() {
       </Typography>
 
       {/* Table des matières */}
-      <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 4 }}>
-        {categories.map((cat) => (
-          <Button
-            key={cat}
-            size="small"
-            variant="outlined"
-            href={`#${cat}`}
-            sx={{ textTransform: "none" }}
-          >
-            {cat.charAt(0).toUpperCase() + cat.slice(1)}
-          </Button>
-        ))}
+      <Box sx={{ mt: 3, flexWrap: "wrap", gap: 1, mb: 4 }}>
+        <Typography variant="h5" sx={{ display: "block", mb: 1 }}>
+          Catégories
+        </Typography>
+        <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
+          {categories.map((cat) => (
+            <Button key={cat} size="small" href={`#${cat}`} sx={{ textTransform: "none" }}>
+              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </Button>
+          ))}
+        </Box>
       </Box>
 
       {/* Recherche */}

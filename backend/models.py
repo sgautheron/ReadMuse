@@ -45,3 +45,16 @@ class Utilisateur(Base):
 
     # ✅ Relation avec les interactions
     interactions = relationship("Interaction", back_populates="utilisateur")
+
+
+class Favori(Base):
+    __tablename__ = "Favoris"
+
+    ID_Favori = Column(Integer, primary_key=True, index=True)
+    ID_Utilisateur = Column(Integer, ForeignKey("Utilisateurs.ID_Utilisateur"))
+    ID_Livre = Column(Integer, ForeignKey("Livres.ID_Livre"))
+
+    utilisateur = relationship("Utilisateur", back_populates="favoris")
+    livre = relationship("Livre")
+
+Utilisateur.favoris = relationship("Favori", back_populates="utilisateur", cascade="all, delete")

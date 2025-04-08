@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { TextField, Button, Box, Typography, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import backgroundImage from "../assets/bibliotheque.jpg";
 
 function Register() {
   const [nom, setNom] = useState("");
@@ -34,17 +35,27 @@ function Register() {
   return (
     <Box
       sx={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: "100%",
-        maxWidth: 400,
+        minHeight: "100vh",
+        width: "100vw",
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         px: 2,
       }}
     >
-      <Paper elevation={3} sx={{ p: 4, width: 400, maxWidth: "100%" }}>
-        <Typography variant="h5" mb={2} textAlign="center">
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          width: "100%",
+          maxWidth: 400,
+        }}
+      >
+        <Typography variant="h3" mb={2} textAlign="center">
           Inscription
         </Typography>
         <TextField
@@ -65,7 +76,6 @@ function Register() {
         />
         <TextField
           label="Mot de passe"
-          variant="outlined"
           fullWidth
           type="password"
           value={motDePasse}
@@ -76,7 +86,7 @@ function Register() {
             {erreur}
           </Typography>
         )}
-        <Button variant="contained" fullWidth sx={{ mt: 3 }} onClick={handleRegister}>
+        <Button fullWidth sx={{ mt: 3 }} onClick={handleRegister}>
           S’inscrire
         </Button>
       </Paper>

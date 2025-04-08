@@ -7,63 +7,45 @@ db = SessionLocal()
 descriptions = [
     {
         "ID_Utilisateur": 1,
-        "ID_Livre": 25753,
+        "ID_Livre": 24881,
         "Note": 4,
-        "Description": "Le jeune homme est un texte fulgurant d’honnêteté. J’ai été bouleversée par la manière dont Annie Ernaux parle du désir, de l’âge, et de l’écriture avec autant de justesse et de lucidité."
+        "Description": "J'ai adoré la façon dont Foenkinos imagine Lennon en pleine introspection. L'aspect psychanalytique est original et poignant. On ressent toute la fragilité de l'artiste derrière l'icône."
     },
     {
         "ID_Utilisateur": 1,
-        "ID_Livre": 25765,
+        "ID_Livre": 24882,
         "Note": 4,
-        "Description": "Journal du dehors m’a fascinée par sa façon de capter l’ordinaire. Annie Ernaux y observe notre époque avec une acuité rare, et chaque scène, si simple soit-elle, devient un fragment de mémoire collective."
+        "Description": "Un roman coup de poing. L’histoire, inspirée d’un fait divers, m’a glacé. J’ai été bouleversé par la complexité des sentiments des personnages, et par la question de l’amour qui pousse à l’irréparable."
     },
     {
         "ID_Utilisateur": 1,
-        "ID_Livre": 25766,
+        "ID_Livre": 24883,
         "Note": 3,
-        "Description": "J’ai adoré redécouvrir le quotidien d’un hypermarché à travers les yeux d’Annie Ernaux. Regarde les lumières mon amour donne une voix à ce qu’on ne remarque plus. C’est presque poétique."
+        "Description": "Un livre à la fois loufoque et tendre. L'idée de collectionner sa femme est à la fois poétique et absurde, dans le bon sens. J’ai beaucoup ri, mais aussi été touché par l’étrangeté d’Hector."
     },
     {
         "ID_Utilisateur": 1,
-        "ID_Livre": 25768,
+        "ID_Livre": 24884,
         "Note": 5,
-        "Description": "Une femme est un livre déchirant et tendre. Ernaux y explore sa relation avec sa mère avec une sincérité qui m’a profondément émue. C’est intime et universel à la fois."
+        "Description": "Une pépite ! Le mystère autour d’Henri Pick est haletant, mais c’est surtout l’amour des livres et la réflexion sur la légitimité artistique qui m’ont emballé. Un roman très intelligent."
     },
     {
         "ID_Utilisateur": 1,
-        "ID_Livre": 25774,
+        "ID_Livre": 24886,
         "Note": 5,
-        "Description": "L’événement est un texte coup de poing. Annie Ernaux ne cherche pas à enjoliver, elle expose la réalité brute d’un avortement clandestin. C’est bouleversant, nécessaire, inoubliable."
+        "Description": "Un choc émotionnel. Le style sobre et haché de Foenkinos colle parfaitement à la vie de Charlotte Salomon. J’ai été bouleversé par cette artiste oubliée. À lire absolument."
     },
     {
         "ID_Utilisateur": 1,
-        "ID_Livre": 25777,
+        "ID_Livre": 24889,
         "Note": 4,
-        "Description": "Ce qu’ils disent ou rien m’a rappelé l’adolescence, ce moment où on cherche sa voix dans un monde où personne ne vous comprend. Une claque de lucidité et de rage sourde."
+        "Description": "Un roman tendre et mélancolique. L’histoire de Nathalie et Markus est improbable, mais pleine d’humanité. C’est une vraie réflexion sur le deuil et le recommencement."
     },
     {
         "ID_Utilisateur": 1,
-        "ID_Livre": 25783,
-        "Note": 5,
-        "Description": "La honte est un livre qui m’a mise face à mes propres souvenirs d’enfance. Annie Ernaux dissèque ce sentiment avec une telle finesse que j’en suis restée bouleversée longtemps après."
-    },
-    {
-        "ID_Utilisateur": 1,
-        "ID_Livre": 25788,
-        "Note": 5,
-        "Description": "Je ne suis pas sortie de ma nuit est un hommage pudique et poignant à une mère qui s’efface. J’ai lu ce livre en apnée, tant il est sincère et cruel à la fois. Une œuvre d’amour et de douleur."
-    },
-    {
-        "ID_Utilisateur": 1,
-        "ID_Livre": 25458,
+        "ID_Livre": 24890,
         "Note": 4,
-        "Description": "Citadelle est une œuvre contemplative, dense, presque mystique. Ce livre m’a accompagné comme un guide spirituel, exigeant mais lumineux."
-    },
-    {
-        "ID_Utilisateur": 1,
-        "ID_Livre": 25459,
-        "Note": 5,
-        "Description": "Le Petit Prince m’a appris à regarder autrement, à voir avec le cœur. C’est un livre d’enfance qu’on comprend vraiment une fois adulte. Inépuisable en beauté et en sagesse."
+        "Description": "La réécriture de l’affaire Florence Rey est aussi romanesque que troublante. Foenkinos explore les zones grises de l’amour, du choix et de la violence avec une intensité rare."
     }
 ]
 

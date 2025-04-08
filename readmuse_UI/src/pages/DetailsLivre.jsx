@@ -3,12 +3,18 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { fetchLivreById, fetchReviewsByBookId } from "../api/livres";
 import { Box, Typography, Button, Paper, Divider, Grow, IconButton } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useUser } from "../context/UserContext";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 const DétailsLivre = () => {
   const { id } = useParams();
   const [livre, setLivre] = useState(null);
   const [reviews, setReviews] = useState([]);
   const navigate = useNavigate();
+  const { utilisateur } = useUser();
+  const [isFavori, setIsFavori] = useState(false);
+  const idLivre = parseInt(id);
 
   const pastelColors = [
     "#ffe5ec",
@@ -38,7 +44,40 @@ const DétailsLivre = () => {
 
     getLivre();
     getReviews();
+
+    if (utilisateur) {
+      fetch(`http://127.0.0.1:8000/favoris/${utilisateur.ID_Utilisateur}`)
+        .then((res) => res.json())
+        .then((data) => {
+          const favoriTrouvé = data.some((fav) => fav.ID_Livre === parseInt(id));
+          setIsFavori(favoriTrouvé);
+        })
+        .catch(() => setIsFavori(false));
+    }
   }, [id]);
+
+  const handleToggleFavori = async () => {
+    if (!utilisateur) {
+      navigate("/login");
+      return;
+    }
+
+    const url = `http://127.0.0.1:8000/favoris/${utilisateur.ID_Utilisateur}/${id}`;
+
+    if (isFavori) {
+      await fetch(url, { method: "DELETE" });
+      setIsFavori(false);
+    } else {
+      await fetch(
+        `http://127.0.0.1:8000/favoris/?id_utilisateur=${utilisateur.ID_Utilisateur}&id_livre=${id}`,
+        {
+          method: "POST",
+        }
+      );
+
+      setIsFavori(true);
+    }
+  };
 
   if (!livre) {
     return <Typography textAlign="center">Chargement...</Typography>;
@@ -47,7 +86,7 @@ const DétailsLivre = () => {
   return (
     <>
       {/* Bouton retour discret */}
-      <Box sx={{ position: "absolute", top: 20, left: 20 }}>
+      <Box sx={{ position: "absolute", top: 80, left: 50 }}>
         <IconButton onClick={() => navigate("/exploration")} color="primary">
           <ArrowBackIcon />
         </IconButton>
@@ -56,11 +95,11 @@ const DétailsLivre = () => {
       <Box
         sx={{
           padding: 4,
-          marginTop: "80px",
-          maxWidth: "1200px",
+          marginTop: "100px",
+          maxWidth: "1500px",
           marginX: "auto",
           display: "flex",
-          gap: 4,
+          gap: 10,
           alignItems: "flex-start",
         }}
       >
@@ -69,43 +108,46 @@ const DétailsLivre = () => {
           <Typography variant="h4" fontWeight="bold" gutterBottom>
             {livre.Titre}
           </Typography>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
+          <Typography variant="h5" color="text.secondary" gutterBottom>
             {livre.Auteur}
           </Typography>
 
-          {livre.URL_Couverture && (
-            <img
-              src={livre.URL_Couverture}
-              alt={livre.Titre}
-              style={{
-                width: "180px",
-                borderRadius: 8,
-                boxShadow: "2px 2px 6px rgba(0,0,0,0.1)",
-                marginBottom: "16px",
-              }}
-            />
-          )}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+            {livre.URL_Couverture && (
+              <img
+                src={livre.URL_Couverture}
+                alt={livre.Titre}
+                style={{
+                  width: "180px",
+                  boxShadow: "2px 2px 6px rgba(0,0,0,0.1)",
+                }}
+              />
+            )}
+            <Button
+              onClick={handleToggleFavori}
+              startIcon={isFavori ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+              sx={{ mt: 2, ml: 3 }}
+            >
+              {isFavori ? "Retirer des favoris" : "Ajouter aux favoris"}
+            </Button>
+          </Box>
 
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h5" gutterBottom>
             Résumé
           </Typography>
           <Paper
-            elevation={0}
             sx={{
               padding: 2,
-              backgroundColor: "#fafafa",
-              border: "1px solid #eee",
-              borderRadius: 2,
-              fontSize: "0.95rem",
+              my: 2,
             }}
           >
-            <Typography variant="body2">{livre.Resume}</Typography>
+            <Typography variant="body1">{livre.Resume}</Typography>
           </Paper>
         </Box>
 
         {/* COLONNE DROITE : mots-clés + avis */}
         <Box sx={{ flex: 1 }}>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h5" gutterBottom>
             Mots-clés associés
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 3 }}>
@@ -137,7 +179,7 @@ const DétailsLivre = () => {
               ))}
           </Box>
 
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="h5" gutterBottom>
             Avis des lecteurs
           </Typography>
           {reviews.length > 0 ? (
@@ -157,7 +199,7 @@ const DétailsLivre = () => {
             <Typography color="text.secondary">Aucun avis pour ce livre.</Typography>
           )}
 
-          <Button variant="outlined" sx={{ mt: 2 }} onClick={() => navigate("/formulaire")}>
+          <Button sx={{ mt: 2 }} onClick={() => navigate("/formulaire")}>
             Laisser un avis
           </Button>
         </Box>

@@ -2,7 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from backend.database import SessionLocal, engine, get_db
-from backend.models import Base, Livre, Interaction, Utilisateur
+from backend.models import Base, Livre, Interaction, Utilisateur, Favori
 from backend.schemas import InteractionCreate, InteractionOut, Description, ReviewOut
 from backend.auth import auth_router
 from backend.recommendation import recommander_livres
@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 from typing import List, Optional
 from datetime import datetime
 import sqlite3
+from backend.utils import generer_profil_litteraire
 
 # ✅ Initialisation de l'app FastAPI
 app = FastAPI()
@@ -17,8 +18,10 @@ app = FastAPI()
 # ✅ Middleware CORS
 app.add_middleware(
     CORSMiddleware,
-allow_origins=["*"]
-
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # ✅ Création des tables si nécessaire
@@ -27,10 +30,9 @@ Base.metadata.create_all(bind=engine)
 # ✅ Inclusion des routes d'auth
 app.include_router(auth_router)
 
-
 # ✅ Route pour récupérer tous les livres
 @app.get("/livres/", response_model=List[dict])
-def get_livres(db: Session = Depends(get_db)):  
+def get_livres(db: Session = Depends(get_db)):
     livres = db.query(Livre).all()
     return [
         {
@@ -44,23 +46,19 @@ def get_livres(db: Session = Depends(get_db)):
             "Editeur": b.Editeur,
             "Nombre_Pages": b.Nombre_Pages,
             "URL_Couverture": b.URL_Couverture
-        } 
+        }
         for b in livres
     ]
-
-
-
 
 class InteractionCreate(BaseModel):
     ID_Utilisateur: int = Field(..., alias="ID_Utilisateur")
     ID_Livre: int = Field(..., alias="ID_Livre")
-    Note: Optional[int] = None 
+    Note: Optional[int] = None
     Description: str = Field(..., alias="Description")
 
     class Config:
         allow_population_by_field_name = True
 
-# ✅ Route pour enregistrer une interaction
 @app.post("/interactions/")
 def create_interaction(interaction: InteractionCreate, db: Session = Depends(get_db)):
     new_interaction = Interaction(
@@ -75,8 +73,6 @@ def create_interaction(interaction: InteractionCreate, db: Session = Depends(get
     db.refresh(new_interaction)
     return {"message": "Interaction enregistrée avec succès", "id": new_interaction.ID_Interaction}
 
-
-
 @app.get("/interactions/{id_utilisateur}", response_model=List[InteractionOut])
 def get_interactions_by_user(id_utilisateur: int, db: Session = Depends(get_db)):
     interactions = (
@@ -86,16 +82,10 @@ def get_interactions_by_user(id_utilisateur: int, db: Session = Depends(get_db))
         .order_by(Interaction.Date_Interaction.desc())
         .all()
     )
-
-    if not interactions:
-        return []  # ou lève une exception si tu préfères
-
     return interactions
-
 
 @app.get("/livres/{id}/reviews", response_model=List[ReviewOut])
 def get_reviews_by_book(id: int, db: Session = Depends(get_db)):
-    print(f"📥 Requête reçue pour les reviews du livre {id}")
     reviews = (
         db.query(Interaction.Description, Interaction.Date_Interaction, Utilisateur.Nom)
         .join(Utilisateur, Utilisateur.ID_Utilisateur == Interaction.ID_Utilisateur)
@@ -103,35 +93,29 @@ def get_reviews_by_book(id: int, db: Session = Depends(get_db)):
         .order_by(Interaction.Date_Interaction.desc())
         .all()
     )
-
     return [
         {
             "utilisateur": r.Nom,
             "commentaire": r.Description,
-            "date": r.Date_Interaction.date()  # ✅ ici !!
+            "date": r.Date_Interaction.date()
         }
         for r in reviews
     ]
 
-
-# ✅ Route d'accueil
 @app.get("/")
 def home():
     return {"message": "Bienvenue sur l'API ReadMuse !"}
-
 
 @app.get("/livres/par_categorie")
 def get_livres_par_categorie():
     conn = sqlite3.connect("data/bdd_readmuse.db")
     cursor = conn.cursor()
-
     cursor.execute("SELECT * FROM Livres")
     livres = cursor.fetchall()
 
-    # Regroupe les livres par catégorie
     categories = {}
     for livre in livres:
-        categorie = livre[11] if livre[11] else "Autres"  # Index de ta colonne Catégorie
+        categorie = livre[11] if livre[11] else "Autres"
         if categorie not in categories:
             categories[categorie] = []
         categories[categorie].append({
@@ -139,7 +123,6 @@ def get_livres_par_categorie():
             "Titre": livre[1],
             "Auteur": livre[2],
             "Genre": livre[3],
-            "Genre": livre[4],
             "Resume": livre[5],
             "Date_Publication": livre[6],
             "Editeur": livre[7],
@@ -151,50 +134,22 @@ def get_livres_par_categorie():
     conn.close()
     return categories
 
-
 @app.get("/livres/populaires")
 def get_livres_par_popularite():
     conn = sqlite3.connect("data/bdd_readmuse.db")
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-
     cursor.execute("SELECT * FROM LivresParPopularite")
     livres = cursor.fetchall()
-
     conn.close()
     return [dict(livre) for livre in livres]
 
-
-# ✅ Route pour récupérer les avis (reviews) d’un livre AVANT la route /livres/{id}
-@app.get("/livres/{id}/reviews", response_model=List[ReviewOut])
-def get_reviews_by_book(id: int, db: Session = Depends(get_db)):
-    print(f"📥 Requête reçue pour les reviews du livre {id}")
-    reviews = (
-        db.query(Interaction.Description, Interaction.Date_Interaction, Utilisateur.Nom)
-        .join(Utilisateur, Utilisateur.ID_Utilisateur == Interaction.ID_Utilisateur)
-        .filter(Interaction.ID_Livre == id)
-        .order_by(Interaction.Date_Interaction.desc())
-        .all()
-    )
-    return [
-        {
-            "utilisateur": r.Nom,
-            "commentaire": r.Description,
-            "date": r.Date_Interaction.date()  # ✅ Conversion ici
-        }
-        for r in reviews
-    ]
-
-
-# Route pour récupérer un livre par ID
 @app.get("/livres/{id}", response_model=dict)
 def get_livre(id: int, db: Session = Depends(get_db)):
     livre = db.query(Livre).filter(Livre.ID_Livre == id).first()
-    
     if not livre:
         raise HTTPException(status_code=404, detail="Livre non trouvé")
-
-    livre_dict = {
+    return {
         "ID_Livre": livre.ID_Livre,
         "Titre": livre.Titre,
         "Auteur": livre.Auteur,
@@ -206,33 +161,21 @@ def get_livre(id: int, db: Session = Depends(get_db)):
         "Nombre_Pages": livre.Nombre_Pages,
         "URL_Couverture": livre.URL_Couverture
     }
-    
-    print(f"📢 Données envoyées par l'API pour ID {id}:", livre_dict)
-    
-    return livre_dict
-
-
 
 class Description(BaseModel):
     texte: str
-
-
 
 @app.post("/api/recommander")
 def recommander(description: Description, db: Session = Depends(get_db)):
     recommandations = recommander_livres(description.texte, db)
     return {"recommandations": recommandations}
 
-
-
 @app.get("/livres/motcle/{tag}", response_model=List[dict])
 def get_livres_par_mot_cle(tag: str, db: Session = Depends(get_db)):
     tag = tag.strip().lower()
     livres = db.query(Livre).filter(Livre.Mots_Cles.ilike(f"%{tag}%")).all()
-
     if not livres:
         raise HTTPException(status_code=404, detail="Aucun livre trouvé pour ce mot-clé.")
-
     return [
         {
             "ID_Livre": livre.ID_Livre,
@@ -244,3 +187,64 @@ def get_livres_par_mot_cle(tag: str, db: Session = Depends(get_db)):
         for livre in livres
     ]
 
+@app.post("/favoris/")
+def ajouter_favori(id_utilisateur: int, id_livre: int, db: Session = Depends(get_db)):
+    favori = Favori(ID_Utilisateur=id_utilisateur, ID_Livre=id_livre)
+    db.add(favori)
+    db.commit()
+    return {"message": "Ajouté aux favoris"}
+
+@app.get("/favoris/{id_utilisateur}", response_model=List[dict])
+def get_favoris(id_utilisateur: int, db: Session = Depends(get_db)):
+    favoris = (
+        db.query(Favori, Livre)
+        .join(Livre, Favori.ID_Livre == Livre.ID_Livre)
+        .filter(Favori.ID_Utilisateur == id_utilisateur)
+        .all()
+    )
+    return [
+        {
+            "ID_Livre": livre.ID_Livre,
+            "Titre": livre.Titre,
+            "Auteur": livre.Auteur,
+            "URL_Couverture": livre.URL_Couverture,
+        }
+        for _, livre in favoris
+    ]
+
+@app.delete("/favoris/{id_utilisateur}/{id_livre}")
+def supprimer_favori(id_utilisateur: int, id_livre: int, db: Session = Depends(get_db)):
+    favori = (
+        db.query(Favori)
+        .filter(Favori.ID_Utilisateur == id_utilisateur, Favori.ID_Livre == id_livre)
+        .first()
+    )
+    if not favori:
+        raise HTTPException(status_code=404, detail="Favori non trouvé")
+    db.delete(favori)
+    db.commit()
+    return {"message": "Retiré des favoris"}
+
+@app.get("/utilisateurs/{id_utilisateur}/stats")
+def get_stats_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
+    from sqlalchemy import func
+    total_interactions = db.query(func.count()).filter(Interaction.ID_Utilisateur == id_utilisateur).scalar()
+    livres_distincts = db.query(func.count(func.distinct(Interaction.ID_Livre))).filter(Interaction.ID_Utilisateur == id_utilisateur).scalar()
+    return {
+        "total_interactions": total_interactions,
+        "livres_distincts": livres_distincts,
+    }
+
+@app.get("/utilisateurs/{id_utilisateur}/profil_ia")
+def get_profil_litteraire(id_utilisateur: int, db: Session = Depends(get_db)):
+    interactions = (
+        db.query(Interaction.Description)
+        .filter(Interaction.ID_Utilisateur == id_utilisateur)
+        .all()
+    )
+    descriptions = [desc.Description for desc in interactions]
+
+    if not descriptions:
+        raise HTTPException(status_code=404, detail="Pas assez de données pour générer un profil littéraire.")
+
+    return {"profil": generer_profil_litteraire(descriptions)}

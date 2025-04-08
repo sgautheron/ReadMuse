@@ -183,7 +183,7 @@ const HeroSection = () => {
               <Typography variant="body2" sx={{ mt: 1 }}>
                 Connectez-vous pour enregistrer vos préférences et suivre d'autres lecteurs.
               </Typography>
-              <Button component={Link} to="/" sx={{ mt: 2 }}>
+              <Button component={Link} to="/login" sx={{ mt: 2 }}>
                 Se connecter
               </Button>
             </Paper>

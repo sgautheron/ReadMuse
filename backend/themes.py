@@ -16,7 +16,7 @@ themes = {
         "profondeur", "poésie", "envoûtant", "métaphorique", "chaotique",
         "paranoïaque", "sobre", "puissant", "intense", "mature", "original", 
         "simplicité", "subtil", "raffinement", "intelligence", "nuance", "profond", 
-        "intime", "minimaliste", "baroque", "élaboré", "académique"
+        "intime", "minimaliste", "baroque", "élaboré", "académique", "psychanalytique"
 
     ],
     "émotions": [
@@ -35,8 +35,7 @@ themes = {
         "attachant", "complexe", "psychologie", "relation", "héroïne", "protagoniste",
         "antagoniste", "profond", "nuancé", "humain", "évolution", "introspection",
         "caractère", "perspective", "voix intérieure", "arc", "charisme", "transformation", 
-        "paumé", "anti-héros", "héros", "tragique", "attachants", "ambigus", "mystérieux", 
-        "authentique", "réaliste", "émouvant", "inoubliable", "attachants", "secondaire", "central"
+        "paumé", "anti-héros", "héros", "tragique", "attachants", "ambigus", "mystérieux", "tendre"
 
     ],
     "rythme": [
@@ -103,7 +102,7 @@ themes = {
     "humour": [
         "drôle", "humoristique", "satirique", "burlesque", "absurde", "comique",
         "ironique", "décalé", "cynique", "sarcastique", "moqueur", "parodique", "mordant", 
-        "irrésitible"
+        "irrésitible", "loufoque"
     ],
     "genre et identité": [
         "transidentité", "non-binarité", "LGBT", "LGBTQ+", "genre", "masculinité toxique", 

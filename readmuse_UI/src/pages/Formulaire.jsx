@@ -103,10 +103,10 @@ function Formulaire() {
           backgroundColor: theme.palette.background.default,
         }}
       >
-        <Typography variant="h4" fontWeight="bold" color="primary" textAlign="center">
+        <Typography variant="h4" fontWeight="bold" textAlign="center">
           Partagez vos Préférences
         </Typography>
-        <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mb: 3 }}>
+        <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mt: 2, mb: 3 }}>
           Décrivez un livre que vous avez aimé. Nous analyserons vos réponses pour vous recommander
           des lectures adaptées !
         </Typography>
@@ -157,12 +157,16 @@ function Formulaire() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Parlez-nous de l'univers, du style, de l'intrigue, des émotions..."
             />
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 2, mb: 1 }}>
               <strong>Exemple :</strong> J’ai adoré ce livre pour son univers riche et immersif. Les
               personnages sont bien développés, l’écriture est fluide et poétique, et j’ai été
               happée par le suspense jusqu’à la fin.
             </Typography>
-            <Typography variant="body2" color="warning.main" sx={{ mb: 2, fontStyle: "italic" }}>
+            <Typography
+              variant="body2"
+              color="warning.main"
+              sx={{ mt: 2, mb: 2, fontStyle: "italic" }}
+            >
               ⚠️ Conseil : Essayez d’être précis. Évitez « Ce livre est super », et préférez des
               détails sur l’écriture, l’univers ou les émotions ressenties.
             </Typography>

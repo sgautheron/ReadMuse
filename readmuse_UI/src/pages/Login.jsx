@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TextField, Button, Box, Typography, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import backgroundImage from "../assets/bibliotheque.jpg";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -39,12 +40,15 @@ function Login() {
   return (
     <Box
       sx={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        width: "100%",
-        maxWidth: 400,
+        minHeight: "100vh",
+        width: "100vw",
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         px: 2,
       }}
     >
@@ -52,11 +56,11 @@ function Login() {
         elevation={3}
         sx={{
           p: 4,
-          borderRadius: 3,
           width: "100%",
+          maxWidth: 400,
         }}
       >
-        <Typography variant="h5" mb={2} textAlign="center">
+        <Typography variant="h3" mb={2} textAlign="center">
           Connexion
         </Typography>
         <TextField
@@ -80,12 +84,12 @@ function Login() {
             {erreur}
           </Typography>
         )}
-        <Button variant="contained" fullWidth sx={{ mt: 3 }} onClick={handleLogin}>
+        <Button fullWidth sx={{ mt: 3 }} onClick={handleLogin}>
           Se connecter
         </Button>
-        <Typography variant="body2" textAlign="center" sx={{ mt: 2 }}>
-          Pas encore de compte ?{" "}
-          <Button variant="text" onClick={() => navigate("/register")}>
+        <Typography variant="body2" textAlign="center" sx={{ mt: 3 }}>
+          Pas encore de compte ?
+          <Button onClick={() => navigate("/register")} sx={{ ml: 3 }}>
             S’inscrire
           </Button>
         </Typography>

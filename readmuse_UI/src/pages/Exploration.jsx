@@ -62,7 +62,6 @@ const Exploration = () => {
         zIndex: 0,
       }}
     >
-      {/* 🧷 Titre + filtres sticky et alignés à gauche */}
       <Box
         sx={{
           position: "sticky",
@@ -157,7 +156,7 @@ const Exploration = () => {
           )}
         </Box>
       ) : (
-        // 📂 Affichage par catégorie
+        // Affichage par catégorie
         Object.entries(livresParCategorie).map(([categorie, livres]) => (
           <Box key={categorie} sx={{ mb: 5 }}>
             <Typography variant="h5" fontWeight="bold" mb={2}>
