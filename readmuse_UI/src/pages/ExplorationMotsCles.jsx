@@ -3,133 +3,131 @@ import {
   Box,
   Typography,
   Chip,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
   TextField,
-  Button,
+  CircularProgress,
+  Select,
+  MenuItem,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { useLocation, useNavigate } from "react-router-dom";
-import themes from "../data/themes";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import WordCloudCompact from "../components/WordCloudCompact";
 
 function ExplorationMotsCles() {
-  const location = useLocation();
   const navigate = useNavigate();
   const [filtre, setFiltre] = useState("");
-  const containerRef = useRef(null);
+  const [motsCles, setMotsCles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [tri, setTri] = useState("frequence");
 
   useEffect(() => {
-    if (location.hash) {
-      const id = location.hash.substring(1);
-      const element = document.getElementById(id);
-      if (element) {
-        const yOffset = -80;
-        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-        window.scrollTo({ top: y, behavior: "smooth" });
-      }
-    }
-  }, [location]);
+    axios
+      .get("http://localhost:8000/motcles_populaires")
+      .then((res) => {
+        setMotsCles(res.data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("❌ Erreur chargement mots-clés", err);
+        setLoading(false);
+      });
+  }, []);
 
-  const categories = Object.keys(themes);
-
-  const handleMotCleClick = (mot) => {
+  const handleClick = (mot) => {
     navigate(`/motcle/${mot}`);
   };
 
-  // Couleurs pastel douces
-  const pastelColors = [
-    "#fce4ec",
-    "#e1f5fe",
-    "#f3e5f5",
-    "#fff3e0",
-    "#e8f5e9",
-    "#ede7f6",
-    "#f9fbe7",
-    "#e0f2f1",
-    "#fbe9e7",
-    "#f1f8e9",
-  ];
+  const motsFiltres = motsCles
+    .filter((mot) => mot.nb_livres >= 3)
+    .filter((mot) => mot.mot.toLowerCase().includes(filtre.toLowerCase()))
+    .sort((a, b) => {
+      if (tri === "alpha") return a.mot.localeCompare(b.mot);
+      if (tri === "inverse") return a.nb_livres - b.nb_livres;
+      return b.nb_livres - a.nb_livres;
+    });
+
+  const motsValides = motsFiltres
+    .filter(
+      (mot) =>
+        mot.mot &&
+        typeof mot.mot === "string" &&
+        mot.mot.trim().length > 2 &&
+        typeof mot.nb_livres === "number"
+    )
+    .map((mot, i) => {
+      const cleanedText = mot.mot
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\d_]/g, "")
+        .trim()
+        .toLowerCase();
+
+      return {
+        text: cleanedText,
+        value: mot.nb_livres,
+        key: `${cleanedText}-${i}`,
+      };
+    })
+    .filter((mot) => mot.text.length > 2)
+    .slice(0, 50);
 
   return (
-    <Box
-      sx={{
-        mt: 3,
-        pt: 12,
-        px: 4,
-        backgroundColor: "#f5f0e6",
-        minHeight: "100vh",
-      }}
-      ref={containerRef}
-    >
+    <Box sx={{ mt: 3, pt: 12, px: 2, backgroundColor: "#f5f0e6", minHeight: "100vh" }}>
       <Typography variant="h1" gutterBottom>
         Exploration par mots-clés
       </Typography>
 
-      {/* Table des matières */}
-      <Box sx={{ mt: 3, flexWrap: "wrap", gap: 1, mb: 4 }}>
-        <Typography variant="h5" sx={{ display: "block", mb: 1 }}>
-          Catégories
-        </Typography>
-        <Box sx={{ mt: 2, display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {categories.map((cat) => (
-            <Button key={cat} size="small" href={`#${cat}`} sx={{ textTransform: "none" }}>
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
-            </Button>
-          ))}
-        </Box>
-      </Box>
-
-      {/* Recherche */}
       <TextField
         label="Rechercher un mot-clé"
         variant="outlined"
         fullWidth
-        sx={{ mb: 4, backgroundColor: "white" }}
+        sx={{ mb: 2, backgroundColor: "white" }}
         value={filtre}
-        onChange={(e) => setFiltre(e.target.value.toLowerCase())}
+        onChange={(e) => setFiltre(e.target.value)}
       />
 
-      {/* Blocs thématiques */}
-      {categories.map((categorie, index) => {
-        const mots = themes[categorie].filter((mot) => mot.toLowerCase().includes(filtre));
-        if (mots.length === 0) return null;
+      <Select
+        value={tri}
+        onChange={(e) => setTri(e.target.value)}
+        size="small"
+        sx={{ mb: 4, backgroundColor: "white" }}
+      >
+        <MenuItem value="frequence">🔝 Par fréquence</MenuItem>
+        <MenuItem value="alpha">🔤 Ordre alphabétique</MenuItem>
+        <MenuItem value="inverse">🆕 Par fréquence croissante</MenuItem>
+      </Select>
 
-        const bgColor = pastelColors[index % pastelColors.length];
+      <Typography variant="caption" sx={{ display: "block", mb: 2 }}>
+        {motsCles.length} mots-clés récupérés depuis le backend
+      </Typography>
 
-        return (
-          <Box key={categorie} id={categorie} sx={{ mt: 10, mb: 6, px: 2 }}>
-            <Accordion defaultExpanded sx={{ backgroundColor: bgColor, p: 2 }}>
-              <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                <Typography variant="h6" fontWeight="bold">
-                  {categorie.charAt(0).toUpperCase() + categorie.slice(1)}
-                </Typography>
-              </AccordionSummary>
-              <AccordionDetails>
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-                  {mots.map((mot) => (
-                    <Chip
-                      key={mot}
-                      label={mot}
-                      variant="outlined"
-                      onClick={() => handleMotCleClick(mot)}
-                      sx={{
-                        cursor: "pointer",
-                        transition: "all 0.2s",
-                        "&:hover": {
-                          backgroundColor: "#5d4037",
-                          color: "white",
-                          transform: "scale(1.05)",
-                        },
-                      }}
-                    />
-                  ))}
-                </Box>
-              </AccordionDetails>
-            </Accordion>
+      {loading ? (
+        <CircularProgress />
+      ) : (
+        <>
+          <WordCloudCompact words={motsValides} />
+
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {motsFiltres.map((motObj) => (
+              <Chip
+                key={motObj.mot}
+                label={`${motObj.mot} (${motObj.nb_livres})`}
+                onClick={() => handleClick(motObj.mot)}
+                sx={{
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  fontSize: "0.9rem",
+                  "&:hover": {
+                    backgroundColor: "#5d4037",
+                    color: "white",
+                    transform: "scale(1.05)",
+                  },
+                }}
+              />
+            ))}
           </Box>
-        );
-      })}
+        </>
+      )}
     </Box>
   );
 }

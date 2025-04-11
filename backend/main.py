@@ -11,14 +11,23 @@ from typing import List, Optional
 from datetime import datetime
 import sqlite3
 from backend.utils import generer_profil_litteraire
+from collections import Counter
+import spacy
+from .database import get_db  # selon ton organisation
+from fastapi.middleware.cors import CORSMiddleware
+
+
+nlp = spacy.load("fr_core_news_sm")
+
 
 # ✅ Initialisation de l'app FastAPI
 app = FastAPI()
 
 # ✅ Middleware CORS
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173"],  # ← Ajoute bien ce port !
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,6 +67,10 @@ class InteractionCreate(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
+
+class DescriptionUtilisateur(BaseModel):
+    texte: str
+
 
 @app.post("/interactions/")
 def create_interaction(interaction: InteractionCreate, db: Session = Depends(get_db)):
@@ -248,3 +261,40 @@ def get_profil_litteraire(id_utilisateur: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Pas assez de données pour générer un profil littéraire.")
 
     return {"profil": generer_profil_litteraire(descriptions)}
+
+@app.post("/recommander_par_description")
+def recommander_par_description(description: DescriptionUtilisateur, db: Session = Depends(get_db)):
+    recommandations = recommander_livres(description.texte, db)
+    return {"recommandations": recommandations}
+
+
+@app.get("/motcles_populaires")
+def get_motcles_populaires(db: Session = Depends(get_db)):
+    from backend.recommendation import stopwords_personnalises  # adapte si besoin
+
+    descriptions = [interaction.Description for interaction in db.query(Interaction).all()]
+    mots = []
+
+    for desc in descriptions:
+        doc = nlp(desc.lower())
+        mots += [
+            token.lemma_.lower()
+            for token in doc
+            if token.is_alpha
+            and not token.is_stop
+            and token.lemma_.lower() not in stopwords_personnalises
+        ]
+
+    compte = Counter(mots)
+
+    # ❌ Enlever les mots trop rares (< 3 occurrences)
+    compte_filtré = {mot: freq for mot, freq in compte.items() if freq >= 3}
+
+    # ✅ Tri décroissant
+    mots_cles = sorted(
+        [{"mot": mot, "nb_livres": freq} for mot, freq in compte_filtré.items()],
+        key=lambda x: x["nb_livres"],
+        reverse=True,
+    )
+
+    return mots_cles

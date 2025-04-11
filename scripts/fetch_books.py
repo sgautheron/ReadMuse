@@ -11,15 +11,11 @@ API_KEY = "AIzaSyAkiZ59B6x_NGhmcC1Emvd3lc1IfgHbNO4"
 DATABASE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "../data/bdd_readmuse.db"))
 
 # 📊 Paramètres API
-MAX_RESULTS = 40
+MAX_RESULTS = 3
 
 # 🔖 Requêtes tendances pour les livres populaires actuels en France
 TRENDING_QUERIES = {
-    "Nouveautés 2024": "nouveautés littéraires 2024",
-    "Best-sellers France": "best sellers romans France 2024",
-    "Romans du moment": "romans qui font parler 2024",
-    "Prix littéraires": "Goncourt Renaudot Interallié Femina 2024",
-    "Écrivains médiatisés": "Nicolas Demorand Amélie Nothomb Virginie Despentes"
+    "Nicolas Demorand INTÉRIEUR NUIT" : "Nicolas Demorand INTÉRIEUR NUIT"
 }
 
 

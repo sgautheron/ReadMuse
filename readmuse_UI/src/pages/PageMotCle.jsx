@@ -1,9 +1,9 @@
+// 🔁 Page PageMotCle.jsx (inchangée à part le décodage + titre)
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { Box, Typography, Card, CardMedia, CardContent, Button } from "@mui/material";
 
-// 🎨 Couleurs pastel douces pour les cartes
 const pastelColors = [
   "#fce4ec",
   "#e1f5fe",
@@ -19,32 +19,32 @@ const pastelColors = [
 
 const PageMotCle = () => {
   const { tag } = useParams();
+  const motCle = decodeURIComponent(tag);
   const [livres, setLivres] = useState([]);
   const [erreur, setErreur] = useState(null);
 
   useEffect(() => {
-    const fetchLivres = async () => {
-      try {
-        const res = await axios.get(`http://localhost:8000/livres/motcle/${tag}`);
+    axios
+      .get(`http://localhost:8000/livres/motcle/${motCle}`)
+      .then((res) => {
         setLivres(res.data);
         setErreur(null);
-      } catch (err) {
+      })
+      .catch((err) => {
         if (err.response?.status === 404) {
           setLivres([]);
-          setErreur(null); // Ce n'est pas une vraie erreur
+          setErreur(null);
         } else {
-          console.error("❌ Erreur récupération livres :", err);
+          console.error("Erreur récupération livres :", err);
           setErreur("Une erreur est survenue lors du chargement.");
         }
-      }
-    };
-    fetchLivres();
-  }, [tag]);
+      });
+  }, [motCle]);
 
   return (
     <Box sx={{ padding: 4 }}>
       <Typography variant="h4" fontWeight="bold" mb={3}>
-        Livres associés au mot-clé : {decodeURIComponent(tag)}
+        Livres associés au mot-clé : {motCle}
       </Typography>
 
       {erreur ? (
@@ -52,15 +52,9 @@ const PageMotCle = () => {
       ) : livres.length === 0 ? (
         <Box sx={{ mt: 4 }}>
           <Typography variant="body1" sx={{ mb: 2 }}>
-            Il n’y a encore aucun livre considéré <strong>« {decodeURIComponent(tag)} »</strong> par
-            les utilisateurs.
+            Aucun livre n’a encore été associé au mot-clé <strong>« {motCle} »</strong>.
           </Typography>
-          <Button
-            variant="contained"
-            component={Link}
-            to="/formulaire"
-            sx={{ textTransform: "none" }}
-          >
+          <Button variant="contained" component={Link} to="/formulaire">
             Proposez-en un via le formulaire ✍️
           </Button>
         </Box>

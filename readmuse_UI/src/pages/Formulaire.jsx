@@ -59,6 +59,7 @@ function Formulaire() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(preferenceData),
       });
+      localStorage.setItem("livre_decrit", selectedLivre.ID_Livre);
 
       if (response.ok) {
         const recoResponse = await fetch("http://127.0.0.1:8000/api/recommander", {
