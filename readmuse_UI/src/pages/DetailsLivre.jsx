@@ -14,7 +14,6 @@ const DétailsLivre = () => {
   const navigate = useNavigate();
   const { utilisateur } = useUser();
   const [isFavori, setIsFavori] = useState(false);
-  const idLivre = parseInt(id);
 
   const pastelColors = [
     "#ffe5ec",
@@ -30,6 +29,15 @@ const DétailsLivre = () => {
     const hash = [...str].reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return pastelColors[hash % pastelColors.length];
   };
+
+  const normaliser = (mot) =>
+    mot
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\d_]/g, "")
+      .trim()
+      .toLowerCase();
 
   useEffect(() => {
     const getLivre = async () => {
@@ -70,11 +78,8 @@ const DétailsLivre = () => {
     } else {
       await fetch(
         `http://127.0.0.1:8000/favoris/?id_utilisateur=${utilisateur.ID_Utilisateur}&id_livre=${id}`,
-        {
-          method: "POST",
-        }
+        { method: "POST" }
       );
-
       setIsFavori(true);
     }
   };
@@ -85,7 +90,6 @@ const DétailsLivre = () => {
 
   return (
     <>
-      {/* Bouton retour discret */}
       <Box sx={{ position: "absolute", top: 80, left: 50 }}>
         <IconButton onClick={() => navigate("/exploration")} color="primary">
           <ArrowBackIcon />
@@ -99,12 +103,13 @@ const DétailsLivre = () => {
           maxWidth: "1500px",
           marginX: "auto",
           display: "flex",
+          flexWrap: "wrap",
           gap: 10,
           alignItems: "flex-start",
         }}
       >
-        {/* COLONNE GAUCHE : détails du livre */}
-        <Box sx={{ flex: 1 }}>
+        {/* Détails */}
+        <Box sx={{ flex: 1, minWidth: "300px" }}>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
             {livre.Titre}
           </Typography>
@@ -135,48 +140,48 @@ const DétailsLivre = () => {
           <Typography variant="h5" gutterBottom>
             Résumé
           </Typography>
-          <Paper
-            sx={{
-              padding: 2,
-              my: 2,
-            }}
-          >
+          <Paper sx={{ padding: 2, my: 2 }}>
             <Typography variant="body1">{livre.Resume}</Typography>
           </Paper>
         </Box>
 
-        {/* COLONNE DROITE : mots-clés + avis */}
-        <Box sx={{ flex: 1 }}>
+        {/* Mots-clés & avis */}
+        <Box sx={{ flex: 1, minWidth: "300px" }}>
           <Typography variant="h5" gutterBottom>
             Mots-clés associés
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 3 }}>
             {livre.Mots_Cles &&
-              livre.Mots_Cles.split(",").map((mot, index) => (
-                <Grow in key={index} timeout={300 + index * 80}>
-                  <Link to={`/motcle/${mot.trim()}`} style={{ textDecoration: "none" }}>
-                    <Paper
-                      sx={{
-                        px: 2,
-                        py: 1,
-                        backgroundColor: getPastelColor(mot),
-                        color: "#333",
-                        borderRadius: "999px",
-                        fontSize: "0.9rem",
-                        fontWeight: "bold",
-                        textTransform: "capitalize",
-                        transition: "0.3s",
-                        ":hover": {
-                          opacity: 0.85,
-                          cursor: "pointer",
-                        },
-                      }}
-                    >
-                      {mot.trim()}
-                    </Paper>
-                  </Link>
-                </Grow>
-              ))}
+              livre.Mots_Cles.split(",").map((mot, index) => {
+                const cleaned = normaliser(mot);
+                if (!cleaned) return null;
+
+                return (
+                  <Grow in key={index} timeout={300 + index * 80}>
+                    <Link to={`/motcle/${cleaned}`} style={{ textDecoration: "none" }}>
+                      <Paper
+                        sx={{
+                          px: 2,
+                          py: 1,
+                          backgroundColor: getPastelColor(cleaned),
+                          color: "#333",
+                          borderRadius: "999px",
+                          fontSize: "0.9rem",
+                          fontWeight: "bold",
+                          textTransform: "capitalize",
+                          transition: "0.3s",
+                          ":hover": {
+                            opacity: 0.85,
+                            cursor: "pointer",
+                          },
+                        }}
+                      >
+                        {mot.trim()}
+                      </Paper>
+                    </Link>
+                  </Grow>
+                );
+              })}
           </Box>
 
           <Typography variant="h5" gutterBottom>

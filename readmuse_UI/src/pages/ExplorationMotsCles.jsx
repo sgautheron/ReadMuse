@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import WordCloudCompact from "../components/WordCloudCompact";
 
 function ExplorationMotsCles() {
   const navigate = useNavigate();
@@ -45,31 +44,7 @@ function ExplorationMotsCles() {
       return b.nb_livres - a.nb_livres;
     });
 
-  const motsValides = motsFiltres
-    .filter(
-      (mot) =>
-        mot.mot &&
-        typeof mot.mot === "string" &&
-        mot.mot.trim().length > 2 &&
-        typeof mot.nb_livres === "number"
-    )
-    .map((mot, i) => {
-      const cleanedText = mot.mot
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^\w\s-]/g, "")
-        .replace(/[\d_]/g, "")
-        .trim()
-        .toLowerCase();
-
-      return {
-        text: cleanedText,
-        value: mot.nb_livres,
-        key: `${cleanedText}-${i}`,
-      };
-    })
-    .filter((mot) => mot.text.length > 2)
-    .slice(0, 50);
+  const maxFreq = Math.max(...motsFiltres.map((m) => m.nb_livres), 1);
 
   return (
     <Box sx={{ mt: 3, pt: 12, px: 2, backgroundColor: "#f5f0e6", minHeight: "100vh" }}>
@@ -104,29 +79,61 @@ function ExplorationMotsCles() {
       {loading ? (
         <CircularProgress />
       ) : (
-        <>
-          <WordCloudCompact words={motsValides} />
+        <Box
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "space-between", // pour forcer la justification
+            gap: 1,
+            alignItems: "stretch",
+          }}
+        >
+          {motsFiltres.map((motObj) => {
+            const minSize = 0.8;
+            const maxSize = 3.5;
+            const minFreq = 3;
+            const ratio = (motObj.nb_livres - minFreq) / (maxFreq - minFreq || 1);
+            const fontSizeRem = (minSize + (maxSize - minSize) * ratio).toFixed(2);
 
-          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-            {motsFiltres.map((motObj) => (
-              <Chip
-                key={motObj.mot}
-                label={`${motObj.mot} (${motObj.nb_livres})`}
-                onClick={() => handleClick(motObj.mot)}
+            return (
+              <Box
                 sx={{
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  fontSize: "0.9rem",
-                  "&:hover": {
-                    backgroundColor: "#5d4037",
-                    color: "white",
-                    transform: "scale(1.05)",
-                  },
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "flex-start",
+                  gap: 1,
                 }}
-              />
-            ))}
-          </Box>
-        </>
+              >
+                <Chip
+                  key={motObj.mot}
+                  label={`${motObj.mot} (${motObj.nb_livres})`}
+                  onClick={() => handleClick(motObj.mot)}
+                  sx={{
+                    fontSize: `${fontSizeRem}rem`,
+                    height: "auto",
+                    padding: `${0.2 * fontSizeRem}rem ${0.6 * fontSizeRem}rem`,
+                    borderRadius: "16px",
+                    backgroundColor: "#e8e3dc",
+                    cursor: "pointer",
+                    textAlign: "center",
+                    whiteSpace: "normal", // ✅ autorise retour à la ligne
+                    maxWidth: "100%", // ✅ ne dépasse jamais du conteneur
+                    "& .MuiChip-label": {
+                      whiteSpace: "normal",
+                      overflow: "visible",
+                      textOverflow: "unset",
+                    },
+                    "&:hover": {
+                      backgroundColor: "#5d4037",
+                      color: "white",
+                      transform: "scale(1.05)",
+                    },
+                  }}
+                />
+              </Box>
+            );
+          })}
+        </Box>
       )}
     </Box>
   );

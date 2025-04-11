@@ -74,7 +74,7 @@ const Exploration = () => {
         }}
       >
         <Typography variant="h4" fontWeight="bold" mb={2} textAlign="left">
-          Explorer les Livres par catégorie
+          Découvrez nos sélections littéraires
         </Typography>
 
         <Box

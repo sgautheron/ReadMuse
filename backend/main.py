@@ -13,33 +13,23 @@ import sqlite3
 from backend.utils import generer_profil_litteraire
 from collections import Counter
 import spacy
-from .database import get_db  # selon ton organisation
-from fastapi.middleware.cors import CORSMiddleware
-
+from sqlalchemy import text
 
 nlp = spacy.load("fr_core_news_sm")
 
-
-# ✅ Initialisation de l'app FastAPI
 app = FastAPI()
-
-# ✅ Middleware CORS
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # ← Ajoute bien ce port !
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ✅ Création des tables si nécessaire
 Base.metadata.create_all(bind=engine)
-
-# ✅ Inclusion des routes d'auth
 app.include_router(auth_router)
 
-# ✅ Route pour récupérer tous les livres
 @app.get("/livres/", response_model=List[dict])
 def get_livres(db: Session = Depends(get_db)):
     livres = db.query(Livre).all()
@@ -60,17 +50,16 @@ def get_livres(db: Session = Depends(get_db)):
     ]
 
 class InteractionCreate(BaseModel):
-    ID_Utilisateur: int = Field(..., alias="ID_Utilisateur")
-    ID_Livre: int = Field(..., alias="ID_Livre")
+    ID_Utilisateur: int = Field(...)
+    ID_Livre: int = Field(...)
     Note: Optional[int] = None
-    Description: str = Field(..., alias="Description")
+    Description: str = Field(...)
 
     class Config:
         allow_population_by_field_name = True
 
 class DescriptionUtilisateur(BaseModel):
     texte: str
-
 
 @app.post("/interactions/")
 def create_interaction(interaction: InteractionCreate, db: Session = Depends(get_db)):
@@ -143,7 +132,6 @@ def get_livres_par_categorie():
             "URL_Couverture": livre[9],
             "ISBN": livre[10]
         })
-
     conn.close()
     return categories
 
@@ -175,126 +163,71 @@ def get_livre(id: int, db: Session = Depends(get_db)):
         "URL_Couverture": livre.URL_Couverture
     }
 
-class Description(BaseModel):
-    texte: str
-
 @app.post("/api/recommander")
 def recommander(description: Description, db: Session = Depends(get_db)):
     recommandations = recommander_livres(description.texte, db)
     return {"recommandations": recommandations}
 
-@app.get("/livres/motcle/{tag}", response_model=List[dict])
-def get_livres_par_mot_cle(tag: str, db: Session = Depends(get_db)):
-    tag = tag.strip().lower()
-    livres = db.query(Livre).filter(Livre.Mots_Cles.ilike(f"%{tag}%")).all()
-    if not livres:
-        raise HTTPException(status_code=404, detail="Aucun livre trouvé pour ce mot-clé.")
-    return [
-        {
-            "ID_Livre": livre.ID_Livre,
-            "Titre": livre.Titre,
-            "Auteur": livre.Auteur,
-            "URL_Couverture": livre.URL_Couverture,
-            "Mots_Cles": livre.Mots_Cles,
-        }
-        for livre in livres
-    ]
+from sqlalchemy import text
+import unicodedata
 
-@app.post("/favoris/")
-def ajouter_favori(id_utilisateur: int, id_livre: int, db: Session = Depends(get_db)):
-    favori = Favori(ID_Utilisateur=id_utilisateur, ID_Livre=id_livre)
-    db.add(favori)
-    db.commit()
-    return {"message": "Ajouté aux favoris"}
+def normaliser_texte(txt):
+    txt = unicodedata.normalize('NFD', txt)
+    txt = ''.join(c for c in txt if unicodedata.category(c) != 'Mn')
+    txt = ''.join(c for c in txt if c.isalpha() or c.isspace() or c == "-")
+    return txt.strip().lower()
 
-@app.get("/favoris/{id_utilisateur}", response_model=List[dict])
-def get_favoris(id_utilisateur: int, db: Session = Depends(get_db)):
-    favoris = (
-        db.query(Favori, Livre)
-        .join(Livre, Favori.ID_Livre == Livre.ID_Livre)
-        .filter(Favori.ID_Utilisateur == id_utilisateur)
-        .all()
-    )
-    return [
-        {
-            "ID_Livre": livre.ID_Livre,
-            "Titre": livre.Titre,
-            "Auteur": livre.Auteur,
-            "URL_Couverture": livre.URL_Couverture,
-        }
-        for _, livre in favoris
-    ]
 
-@app.delete("/favoris/{id_utilisateur}/{id_livre}")
-def supprimer_favori(id_utilisateur: int, id_livre: int, db: Session = Depends(get_db)):
-    favori = (
-        db.query(Favori)
-        .filter(Favori.ID_Utilisateur == id_utilisateur, Favori.ID_Livre == id_livre)
-        .first()
-    )
-    if not favori:
-        raise HTTPException(status_code=404, detail="Favori non trouvé")
-    db.delete(favori)
-    db.commit()
-    return {"message": "Retiré des favoris"}
+@app.get("/livres/motcle/{mot}")
+def get_livres_depuis_descriptions(mot: str, db: Session = Depends(get_db)):
+    mot_normalise = normaliser_texte(mot)
+    livres_trouves = {}
 
-@app.get("/utilisateurs/{id_utilisateur}/stats")
-def get_stats_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
-    from sqlalchemy import func
-    total_interactions = db.query(func.count()).filter(Interaction.ID_Utilisateur == id_utilisateur).scalar()
-    livres_distincts = db.query(func.count(func.distinct(Interaction.ID_Livre))).filter(Interaction.ID_Utilisateur == id_utilisateur).scalar()
+    interactions = db.query(Interaction).all()
+
+    for interaction in interactions:
+        if interaction.Description:
+            doc = nlp(interaction.Description.lower())
+            lemmas = [token.lemma_.lower() for token in doc if token.is_alpha]
+
+            if mot_normalise in lemmas:
+                livre = db.query(Livre).filter(Livre.ID_Livre == interaction.ID_Livre).first()
+                if livre and livre.ID_Livre not in livres_trouves:
+                    livres_trouves[livre.ID_Livre] = livre
+
     return {
-        "total_interactions": total_interactions,
-        "livres_distincts": livres_distincts,
+        "mot": mot,
+        "nb_livres": len(livres_trouves),
+        "livres": [
+            {
+                "ID_Livre": l.ID_Livre,
+                "Titre": l.Titre,
+                "Auteur": l.Auteur,
+                "URL_Couverture": l.URL_Couverture,
+            }
+            for l in livres_trouves.values()
+        ],
     }
 
-@app.get("/utilisateurs/{id_utilisateur}/profil_ia")
-def get_profil_litteraire(id_utilisateur: int, db: Session = Depends(get_db)):
-    interactions = (
-        db.query(Interaction.Description)
-        .filter(Interaction.ID_Utilisateur == id_utilisateur)
-        .all()
-    )
-    descriptions = [desc.Description for desc in interactions]
-
-    if not descriptions:
-        raise HTTPException(status_code=404, detail="Pas assez de données pour générer un profil littéraire.")
-
-    return {"profil": generer_profil_litteraire(descriptions)}
-
-@app.post("/recommander_par_description")
-def recommander_par_description(description: DescriptionUtilisateur, db: Session = Depends(get_db)):
-    recommandations = recommander_livres(description.texte, db)
-    return {"recommandations": recommandations}
 
 
 @app.get("/motcles_populaires")
 def get_motcles_populaires(db: Session = Depends(get_db)):
-    from backend.recommendation import stopwords_personnalises  # adapte si besoin
-
+    from backend.recommendation import stopwords_personnalises
     descriptions = [interaction.Description for interaction in db.query(Interaction).all()]
     mots = []
-
     for desc in descriptions:
         doc = nlp(desc.lower())
         mots += [
             token.lemma_.lower()
             for token in doc
-            if token.is_alpha
-            and not token.is_stop
-            and token.lemma_.lower() not in stopwords_personnalises
+            if token.is_alpha and not token.is_stop and token.lemma_.lower() not in stopwords_personnalises
         ]
-
     compte = Counter(mots)
-
-    # ❌ Enlever les mots trop rares (< 3 occurrences)
     compte_filtré = {mot: freq for mot, freq in compte.items() if freq >= 3}
-
-    # ✅ Tri décroissant
     mots_cles = sorted(
         [{"mot": mot, "nb_livres": freq} for mot, freq in compte_filtré.items()],
         key=lambda x: x["nb_livres"],
         reverse=True,
     )
-
     return mots_cles

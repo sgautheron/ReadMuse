@@ -1,8 +1,15 @@
-// 🔁 Page PageMotCle.jsx (inchangée à part le décodage + titre)
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
-import { Box, Typography, Card, CardMedia, CardContent, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  CardMedia,
+  CardContent,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 
 const pastelColors = [
   "#fce4ec",
@@ -17,38 +24,57 @@ const pastelColors = [
   "#f1f8e9",
 ];
 
+const normaliserMotCle = (mot) =>
+  mot
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\d_]/g, "")
+    .trim()
+    .toLowerCase();
+
 const PageMotCle = () => {
   const { tag } = useParams();
   const motCle = decodeURIComponent(tag);
+  const motCleNormalise = normaliserMotCle(motCle);
+
   const [livres, setLivres] = useState([]);
+  const [nbLivres, setNbLivres] = useState(0);
   const [erreur, setErreur] = useState(null);
+  const [loading, setLoading] = useState(true); // ✅
 
   useEffect(() => {
+    setLoading(true);
     axios
-      .get(`http://localhost:8000/livres/motcle/${motCle}`)
+      .get(`http://localhost:8000/livres/motcle/${motCleNormalise}`)
       .then((res) => {
-        setLivres(res.data);
+        setLivres(res.data.livres || []);
+        setNbLivres(res.data.nb_livres || 0);
         setErreur(null);
       })
       .catch((err) => {
-        if (err.response?.status === 404) {
-          setLivres([]);
-          setErreur(null);
-        } else {
-          console.error("Erreur récupération livres :", err);
-          setErreur("Une erreur est survenue lors du chargement.");
-        }
-      });
-  }, [motCle]);
+        console.error("Erreur récupération livres :", err);
+        setErreur("Une erreur est survenue lors du chargement.");
+        setLivres([]);
+      })
+      .finally(() => setLoading(false)); // ✅
+  }, [motCleNormalise]);
 
   return (
     <Box sx={{ padding: 4 }}>
-      <Typography variant="h4" fontWeight="bold" mb={3}>
-        Livres associés au mot-clé : {motCle}
-      </Typography>
+      {/* 🧠 Titre en bloc au-dessus */}
+      <Box sx={{ width: "100%", mb: 3, mt: 15 }}>
+        <Typography variant="h4" fontWeight="bold" textAlign="center">
+          Quand les lecteurs parlent de <em>« {motCle} »</em>
+        </Typography>
+      </Box>
 
       {erreur ? (
         <Typography color="error">{erreur}</Typography>
+      ) : loading ? (
+        <Typography textAlign="center" sx={{ mt: 4 }}>
+          ⏳ On fouille les avis à la recherche de ce mot...
+        </Typography>
       ) : livres.length === 0 ? (
         <Box sx={{ mt: 4 }}>
           <Typography variant="body1" sx={{ mb: 2 }}>
@@ -59,7 +85,7 @@ const PageMotCle = () => {
           </Button>
         </Box>
       ) : (
-        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, justifyContent: "center" }}>
           {livres.map((livre, index) => (
             <Card
               key={livre.ID_Livre}

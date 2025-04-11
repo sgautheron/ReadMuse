@@ -1,18 +1,24 @@
 import React, { useRef, useEffect, useState } from "react";
 import WordCloud from "react-d3-cloud";
 
-const fontSizeMapper = (word) => Math.max(20, Math.log2(word.value) * 10);
-const rotate = () => 0;
+const fontSizeMapper = (word) => {
+  return Math.max(40, Math.log2(word.value + 1) * 18); // tu peux augmenter 18 si tu veux plus gros
+};
+
+const rotate = () => 0; // pas de rotation du tout
 
 export default function WordCloudCompact({ words }) {
   const containerRef = useRef(null);
-  const [dimensions, setDimensions] = useState({ width: 1000, height: 600 });
+  const [dimensions, setDimensions] = useState({ width: 1400, height: 1200 }); // taille initiale plus grande
 
   useEffect(() => {
     if (containerRef.current) {
       const observer = new ResizeObserver((entries) => {
         const { width, height } = entries[0].contentRect;
-        setDimensions({ width, height });
+        setDimensions({
+          width: Math.max(width, 1000),
+          height: Math.max(height, 1000),
+        });
       });
       observer.observe(containerRef.current);
       return () => observer.disconnect();
@@ -27,9 +33,10 @@ export default function WordCloudCompact({ words }) {
         typeof mot.value === "number" &&
         mot.text.trim().length > 2
     )
-    .map((mot) => ({
+    .map((mot, i) => ({
       text: mot.text.trim(),
       value: mot.value,
+      key: `${mot.text}-${i}`,
     }));
 
   if (motsNettoyes.length === 0) {
@@ -41,12 +48,16 @@ export default function WordCloudCompact({ words }) {
   }
 
   return (
-    <div ref={containerRef} style={{ width: "100%", height: "600px", marginBottom: "2rem" }}>
+    <div
+      ref={containerRef}
+      style={{ width: "100%", height: "200vh", marginBottom: "2rem" }} // 200% de la hauteur visible
+    >
       <WordCloud
         data={motsNettoyes}
+        font="sans-serif"
         fontSizeMapper={fontSizeMapper}
         rotate={rotate}
-        padding={1}
+        padding={2}
         width={dimensions.width}
         height={dimensions.height}
       />
