@@ -32,7 +32,7 @@ stopwords_personnalises = {
     "fonctionner", "équilibre", "monde", "an", "king", "maîtriser", "parfaitement", "nouveau",
     "poing", "discours", "loin", "ouvrage", "idée", "siècle", "enjeu", "xix", "cas", "donnée", 
     "précieux", "vision", "domaine", "ensemble", "éclairer", "vivre", "document", "dater",
-    "voir", "durkheim", "bourdieu", "action"
+    "voir", "durkheim", "bourdieu", "action", "manque", "Grishaverse", "écrivain"
     }
 
 # ✅ Nettoyage pour vectorisation (garde tous les mots pour permettre les bigrams)

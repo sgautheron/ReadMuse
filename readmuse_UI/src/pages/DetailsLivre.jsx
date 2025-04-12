@@ -11,6 +11,7 @@ const DétailsLivre = () => {
   const { id } = useParams();
   const [livre, setLivre] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [motsClesAvis, setMotsClesAvis] = useState([]);
   const navigate = useNavigate();
   const { utilisateur } = useUser();
   const [isFavori, setIsFavori] = useState(false);
@@ -30,15 +31,6 @@ const DétailsLivre = () => {
     return pastelColors[hash % pastelColors.length];
   };
 
-  const normaliser = (mot) =>
-    mot
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^\w\s-]/g, "")
-      .replace(/[\d_]/g, "")
-      .trim()
-      .toLowerCase();
-
   useEffect(() => {
     const getLivre = async () => {
       const data = await fetchLivreById(id);
@@ -50,8 +42,15 @@ const DétailsLivre = () => {
       setReviews(data);
     };
 
+    const getMotsCles = async () => {
+      const res = await fetch(`http://127.0.0.1:8000/livres/${id}/motcles_avis`);
+      const data = await res.json();
+      setMotsClesAvis(data.motcles);
+    };
+
     getLivre();
     getReviews();
+    getMotsCles();
 
     if (utilisateur) {
       fetch(`http://127.0.0.1:8000/favoris/${utilisateur.ID_Utilisateur}`)
@@ -91,7 +90,7 @@ const DétailsLivre = () => {
   return (
     <>
       <Box sx={{ position: "absolute", top: 80, left: 50 }}>
-        <IconButton onClick={() => navigate("/exploration")} color="primary">
+        <IconButton onClick={() => navigate("/exploration-emo")} color="primary">
           <ArrowBackIcon />
         </IconButton>
       </Box>
@@ -148,40 +147,40 @@ const DétailsLivre = () => {
         {/* Mots-clés & avis */}
         <Box sx={{ flex: 1, minWidth: "300px" }}>
           <Typography variant="h5" gutterBottom>
-            Mots-clés associés
+            Mots-clés issus des avis
           </Typography>
           <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mb: 3 }}>
-            {livre.Mots_Cles &&
-              livre.Mots_Cles.split(",").map((mot, index) => {
-                const cleaned = normaliser(mot);
-                if (!cleaned) return null;
-
-                return (
-                  <Grow in key={index} timeout={300 + index * 80}>
-                    <Link to={`/motcle/${cleaned}`} style={{ textDecoration: "none" }}>
-                      <Paper
-                        sx={{
-                          px: 2,
-                          py: 1,
-                          backgroundColor: getPastelColor(cleaned),
-                          color: "#333",
-                          borderRadius: "999px",
-                          fontSize: "0.9rem",
-                          fontWeight: "bold",
-                          textTransform: "capitalize",
-                          transition: "0.3s",
-                          ":hover": {
-                            opacity: 0.85,
-                            cursor: "pointer",
-                          },
-                        }}
-                      >
-                        {mot.trim()}
-                      </Paper>
-                    </Link>
-                  </Grow>
-                );
-              })}
+            {motsClesAvis.length > 0 ? (
+              motsClesAvis.map((mot, index) => (
+                <Grow in key={index} timeout={300 + index * 80}>
+                  <Link to={`/motcle/${mot}`} style={{ textDecoration: "none" }}>
+                    <Paper
+                      sx={{
+                        px: 2,
+                        py: 1,
+                        backgroundColor: getPastelColor(mot),
+                        color: "#333",
+                        borderRadius: "999px",
+                        fontSize: "0.9rem",
+                        fontWeight: "bold",
+                        textTransform: "capitalize",
+                        transition: "0.3s",
+                        ":hover": {
+                          opacity: 0.85,
+                          cursor: "pointer",
+                        },
+                      }}
+                    >
+                      {mot}
+                    </Paper>
+                  </Link>
+                </Grow>
+              ))
+            ) : (
+              <Typography color="text.secondary">
+                Aucun mot-clé issu des avis pour ce livre.
+              </Typography>
+            )}
           </Box>
 
           <Typography variant="h5" gutterBottom>
@@ -191,8 +190,14 @@ const DétailsLivre = () => {
             reviews.map((review, index) => (
               <Paper key={index} sx={{ padding: 2, my: 2 }}>
                 <Typography variant="body1" fontWeight="bold">
-                  {review.utilisateur}
+                  <Link
+                    to={`/utilisateur/${review.utilisateur_id}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    {review.utilisateur}
+                  </Link>
                 </Typography>
+
                 <Typography variant="body2" color="text.secondary">
                   {new Date(review.date).toLocaleDateString()}
                 </Typography>

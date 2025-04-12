@@ -2,6 +2,7 @@ import { useState } from "react";
 import { TextField, Button, Box, Typography, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import backgroundImage from "../assets/bibliotheque.jpg";
+import theme from "../theme/theme";
 
 function Register() {
   const [nom, setNom] = useState("");
@@ -53,6 +54,7 @@ function Register() {
           p: 4,
           width: "100%",
           maxWidth: 400,
+          backgroundColor: theme.palette.background.default,
         }}
       >
         <Typography variant="h3" mb={2} textAlign="center">

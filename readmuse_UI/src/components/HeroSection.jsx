@@ -95,7 +95,7 @@ const HeroSection = () => {
                 <Button
                   variant="contained"
                   component={Link}
-                  to="/exploration"
+                  to="/exploration-emo"
                   sx={{
                     backgroundColor: theme.palette.background.default,
                     color: theme.palette.text.navbar,
@@ -163,7 +163,7 @@ const HeroSection = () => {
               <Typography variant="body2" sx={{ mt: 1 }}>
                 Parcourez les livres par catégorie ou mots-clés. Cliquez sur ce qui vous inspire !
               </Typography>
-              <Button component={Link} to="/exploration" sx={{ mt: 2 }}>
+              <Button component={Link} to="/exploration-emo" sx={{ mt: 2 }}>
                 Explorer
               </Button>
             </Paper>

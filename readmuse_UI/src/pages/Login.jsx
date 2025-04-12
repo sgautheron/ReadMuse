@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TextField, Button, Box, Typography, Paper } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import backgroundImage from "../assets/bibliotheque.jpg";
+import theme from "../theme/theme";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -11,9 +12,12 @@ function Login() {
   const navigate = useNavigate();
   const { utilisateur, setUtilisateur } = useUser();
 
-  if (utilisateur) {
-    navigate("/profil");
-  }
+  // ✅ Redirection si déjà connecté
+  useEffect(() => {
+    if (utilisateur) {
+      navigate("/profil");
+    }
+  }, [utilisateur, navigate]);
 
   const handleLogin = async () => {
     try {
@@ -33,6 +37,7 @@ function Login() {
       setUtilisateur(data.utilisateur);
       navigate("/profil");
     } catch (err) {
+      console.error(err);
       setErreur("Erreur lors de la connexion.");
     }
   };
@@ -58,11 +63,13 @@ function Login() {
           p: 4,
           width: "100%",
           maxWidth: 400,
+          backgroundColor: theme.palette.background.default,
         }}
       >
         <Typography variant="h3" mb={2} textAlign="center">
           Connexion
         </Typography>
+
         <TextField
           label="Email"
           variant="outlined"
@@ -79,17 +86,20 @@ function Login() {
           value={motDePasse}
           onChange={(e) => setMotDePasse(e.target.value)}
         />
+
         {erreur && (
           <Typography color="error" mt={1}>
             {erreur}
           </Typography>
         )}
+
         <Button fullWidth sx={{ mt: 3 }} onClick={handleLogin}>
           Se connecter
         </Button>
+
         <Typography variant="body2" textAlign="center" sx={{ mt: 3 }}>
-          Pas encore de compte ?
-          <Button onClick={() => navigate("/register")} sx={{ ml: 3 }}>
+          Pas encore de compte ?{" "}
+          <Button onClick={() => navigate("/register")} sx={{ ml: 1 }} size="small">
             S’inscrire
           </Button>
         </Typography>

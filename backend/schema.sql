@@ -54,3 +54,14 @@ CREATE TABLE Recommendations (
     FOREIGN KEY (ID_Utilisateur) REFERENCES Utilisateurs(ID_Utilisateur) ON DELETE CASCADE,
     FOREIGN KEY (ID_Livre) REFERENCES Livres(ID_Livre) ON DELETE CASCADE
 );
+
+
+
+CREATE TABLE Cercle (
+    ID_Utilisateur INTEGER,
+    ID_Membre INTEGER,
+    Date_ajout TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (ID_Utilisateur, ID_Membre),
+    FOREIGN KEY (ID_Utilisateur) REFERENCES Utilisateur(ID_Utilisateur),
+    FOREIGN KEY (ID_Membre) REFERENCES Utilisateur(ID_Utilisateur)
+);

@@ -39,6 +39,7 @@ class InteractionOut(BaseModel):
 from datetime import date
 
 class ReviewOut(BaseModel):
+    utilisateur_id: int
     utilisateur: str
     commentaire: str
     date: date

@@ -56,7 +56,7 @@ function Navbar() {
           <Button
             startIcon={<AutoStoriesIcon />}
             component={Link}
-            to="/exploration"
+            to="/exploration-emo"
             sx={{ mt: 2, mb: 2 }}
           >
             Exploration
