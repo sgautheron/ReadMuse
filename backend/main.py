@@ -234,25 +234,28 @@ def get_reviews_by_book(id: int, db: Session = Depends(get_db)):
 
 
 # ------------------------
-# 🤖 Recommandation
+# Recommandation
 # ------------------------
 
+# ✅ Route recommandation
 @app.post("/api/recommander")
 def recommander(description: Description, db: Session = Depends(get_db)):
     recommandations = recommander_livres(description.texte, db)
     return {"recommandations": recommandations}
 
-
 # ------------------------
-# 🔍 Exploration mots-clés
+# Exploration mots-clés
 # ------------------------
 
-def normaliser_texte(txt):
+# ✅ Normalisation texte pour comparaison
+def normaliser_texte(txt: str) -> str:
     txt = unicodedata.normalize('NFD', txt)
     txt = ''.join(c for c in txt if unicodedata.category(c) != 'Mn')
     txt = ''.join(c for c in txt if c.isalpha() or c.isspace() or c == "-")
     return txt.strip().lower()
 
+
+# ✅ Route : livres associés à un mot-clé
 @app.get("/livres/motcle/{mot}")
 def get_livres_depuis_descriptions(mot: str, db: Session = Depends(get_db)):
     mot_normalise = normaliser_texte(mot)
@@ -262,7 +265,10 @@ def get_livres_depuis_descriptions(mot: str, db: Session = Depends(get_db)):
     for interaction in interactions:
         if interaction.Description:
             doc = nlp(interaction.Description.lower())
-            lemmas = [token.lemma_.lower() for token in doc if token.is_alpha]
+            lemmas = [
+                normaliser_texte(token.lemma_.lower())
+                for token in doc if token.is_alpha
+            ]
             if mot_normalise in lemmas:
                 livre = db.query(Livre).filter(Livre.ID_Livre == interaction.ID_Livre).first()
                 if livre and livre.ID_Livre not in livres_trouves:
@@ -279,59 +285,47 @@ def get_livres_depuis_descriptions(mot: str, db: Session = Depends(get_db)):
         } for l in livres_trouves.values()]
     }
 
+# ✅ Route : top mots-clés d’un livre
 @app.get("/livres/{id}/motcles_avis")
 def get_mots_cles_par_livre(id: int, db: Session = Depends(get_db)):
-    # Récupération des descriptions associées à ce livre
-    interactions = (
-        db.query(Interaction.Description)
-        .filter(Interaction.ID_Livre == id)
-        .all()
-    )
-
-    # Nettoyage des descriptions (ignore les None et les vides)
+    interactions = db.query(Interaction.Description).filter(Interaction.ID_Livre == id).all()
     descriptions = [i.Description.strip() for i in interactions if i.Description and i.Description.strip()]
-
-    # Concaténation du texte
     texte_total = " ".join(descriptions)
 
-    # Logging côté terminal/console
     print(f"[DEBUG] Livre ID {id} : {len(descriptions)} descriptions analysées")
-    print(f"[DEBUG] Texte concaténé : {texte_total[:300]}...")  # pour éviter d’afficher tout un pavé
+    print(f"[DEBUG] Texte concaténé : {texte_total[:300]}...")
 
-    # Analyse NLP
     doc = nlp(texte_total.lower())
     mots = [
-        token.lemma_.lower()
+        normaliser_texte(token.lemma_.lower())
         for token in doc
-        if token.is_alpha
-        and not token.is_stop
-        and token.lemma_.lower() not in stopwords_personnalises
+        if token.is_alpha and not token.is_stop and token.lemma_.lower() not in stopwords_personnalises
     ]
 
     compte = Counter(mots)
-    mots_cles = [mot for mot, freq in compte.most_common(10)]
+    mots_cles = [mot for mot, _ in compte.most_common(10)]
 
     return {
         "motcles": mots_cles,
         "nb_descriptions": len(descriptions),
-        "texte_total_extrait": texte_total[:300],  # pour vérif rapide
+        "texte_total_extrait": texte_total[:300],
         "descriptions": descriptions
     }
 
-    
-
-
+# ✅ Route : mots-clés populaires (globaux)
 @app.get("/motcles_populaires")
 def get_motcles_populaires(db: Session = Depends(get_db)):
-    descriptions = [interaction.Description for interaction in db.query(Interaction).all()]
+    descriptions = [i.Description for i in db.query(Interaction).all()]
     mots = []
+
     for desc in descriptions:
         doc = nlp(desc.lower())
         mots += [
-            token.lemma_.lower()
+            normaliser_texte(token.lemma_.lower())
             for token in doc
             if token.is_alpha and not token.is_stop and token.lemma_.lower() not in stopwords_personnalises
         ]
+
     compte = Counter(mots)
     compte_filtré = {mot: freq for mot, freq in compte.items() if freq >= 3}
     mots_cles = sorted(
@@ -339,11 +333,10 @@ def get_motcles_populaires(db: Session = Depends(get_db)):
         key=lambda x: x["nb_livres"],
         reverse=True,
     )
+
     return mots_cles
-
-
 # ------------------------
-# 🌈 Exploration émotionnelle
+# Exploration émotionnelle
 # ------------------------
 
 CATEGORIES_EMOTIONNELLES = {

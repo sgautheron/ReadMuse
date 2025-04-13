@@ -36,7 +36,8 @@ stopwords_personnalises = {
     "chambre", "laisse", "huis", "mêler", "don", "bord", "terriblement", "plonger", "fil", "mont", 
     "monte", "traite", "porter", "narration", "mal", "changer", "tisser", "croisé",
       "aime", "sarah", "place", "travers", "littéraire" , "bleu" , "atmosphère", "interdire", "émotion",
-      "emporter", "pan"}
+      "emporter", "pan", "besoin", "levy", "marc", "écrire", "veux", "mcfadden", "rien", "venir", "coben", 
+      "doser", "ecrire", "mélissa", "signe", "dimension", "touchée", "fonce", "joue", "sebald", "Millie"}
 
 # ✅ Nettoyage pour vectorisation (garde tous les mots pour permettre les bigrams)
 def nettoyer_avec_bigrams(texte: str) -> str:
