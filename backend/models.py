@@ -18,6 +18,7 @@ class Livre(Base):
     Editeur = Column(String)
     Nombre_Pages = Column(Integer)
     URL_Couverture = Column(String)
+    Categorie = Column(String)  # 👈 Assure-toi que cette ligne est bien là
 
     interactions = relationship("Interaction", back_populates="livre")
     favoris = relationship("Favori", back_populates="livre", cascade="all, delete")

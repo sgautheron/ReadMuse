@@ -3,10 +3,12 @@ import axios from "axios";
 import { Box, Typography, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ScrollContainer from "react-indiana-drag-scroll";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 function ExplorationEmotionnelle() {
   const [categories, setCategories] = useState([]);
   const [allBooks, setAllBooks] = useState([]);
+  const [topVentes, setTopVentes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
@@ -14,8 +16,13 @@ function ExplorationEmotionnelle() {
     axios.get("http://localhost:8000/exploration_emo").then((res) => {
       setCategories(res.data);
     });
+
     axios.get("http://localhost:8000/livres/").then((res) => {
       setAllBooks(res.data);
+    });
+
+    axios.get("http://localhost:8000/livres/top-ventes").then((res) => {
+      setTopVentes(res.data);
     });
   }, []);
 
@@ -25,14 +32,51 @@ function ExplorationEmotionnelle() {
 
   const showSearchResults = searchQuery.trim().length > 0;
 
+  const renderBookImage = (livre) => {
+    const hasCover = livre.URL_Couverture && livre.URL_Couverture !== "";
+    return hasCover ? (
+      <img
+        src={livre.URL_Couverture}
+        alt={livre.Titre}
+        style={{
+          width: "100%",
+          height: 200,
+          objectFit: "cover",
+          borderRadius: 8,
+          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+          textAlign: "left",
+        }}
+        onError={(e) => {
+          e.currentTarget.onerror = null;
+          e.currentTarget.style.display = "none";
+        }}
+      />
+    ) : (
+      <Box
+        sx={{
+          width: "100%",
+          height: 200,
+          borderRadius: 2,
+          backgroundColor: "#f5f0e6", // ✅ couleur de fond assortie
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+        }}
+      >
+        <MenuBookIcon sx={{ fontSize: 60, color: "#aaa" }} />
+      </Box>
+    );
+  };
+
   return (
     <Box sx={{ px: 3, pt: 12, backgroundColor: "#f5f0e6", minHeight: "100vh" }}>
       <Typography variant="h1" gutterBottom>
-        Explorer les livres par émotions 💬
+        Explorer les livres par émotions
       </Typography>
 
       <TextField
-        label="Rechercher un livre dans toute la base"
+        label="Rechercher un livre"
         variant="outlined"
         fullWidth
         value={searchQuery}
@@ -40,6 +84,64 @@ function ExplorationEmotionnelle() {
         sx={{ my: 3 }}
       />
 
+      {/* Section Top Ventes */}
+      {!showSearchResults && topVentes.length > 0 && (
+        <Box sx={{ mb: 6 }}>
+          <Typography variant="h2" sx={{ mb: 2 }}>
+            Top ventes de la semaine
+          </Typography>
+          <ScrollContainer className="scroll-container" horizontal>
+            <Box sx={{ display: "flex", gap: 2 }}>
+              {topVentes.map((livre) => (
+                <Box
+                  key={livre.ID_Livre}
+                  sx={{
+                    width: 150,
+                    flexShrink: 0,
+                    cursor: "pointer",
+                    textAlign: "center",
+                  }}
+                  onClick={() => navigate(`/livre/${livre.ID_Livre}`)}
+                >
+                  {renderBookImage(livre)}
+                  <Typography
+                    variant="subtitle2"
+                    sx={{
+                      fontWeight: "bold",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      fontSize: 14,
+                      textAlign: "left",
+                    }}
+                  >
+                    {livre.Titre}
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        fontSize: 12,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 1,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textAlign: "left",
+                      }}
+                    >
+                      {livre.Auteur}
+                    </Typography>
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </ScrollContainer>
+        </Box>
+      )}
+
+      {/* Résultats de recherche */}
       {showSearchResults && (
         <Box sx={{ mb: 6 }}>
           <Typography variant="h5" sx={{ mb: 2 }}>
@@ -59,15 +161,7 @@ function ExplorationEmotionnelle() {
                     }}
                     onClick={() => navigate(`/livre/${livre.ID_Livre}`)}
                   >
-                    <img
-                      src={livre.URL_Couverture}
-                      alt={livre.Titre}
-                      style={{
-                        width: "100%",
-                        borderRadius: 8,
-                        boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
-                      }}
-                    />
+                    {renderBookImage(livre)}
                     <Typography variant="subtitle2" noWrap>
                       {livre.Titre}
                     </Typography>
@@ -84,14 +178,12 @@ function ExplorationEmotionnelle() {
         </Box>
       )}
 
+      {/* Exploration émotionnelle */}
       {!showSearchResults &&
         categories.map((cat) => (
           <Box key={cat.categorie} sx={{ mb: 6 }}>
-            <Typography variant="h4" sx={{ mb: 2 }}>
+            <Typography variant="h2" sx={{ mb: 2 }}>
               {cat.categorie}{" "}
-              <Typography component="span" variant="body1">
-                ({cat.nb_livres})
-              </Typography>
             </Typography>
             <ScrollContainer className="scroll-container" horizontal>
               <Box sx={{ display: "flex", gap: 2 }}>
@@ -106,19 +198,36 @@ function ExplorationEmotionnelle() {
                     }}
                     onClick={() => navigate(`/livre/${livre.ID_Livre}`)}
                   >
-                    <img
-                      src={livre.URL_Couverture}
-                      alt={livre.Titre}
-                      style={{
-                        width: "100%",
-                        borderRadius: 8,
-                        boxShadow: "0 4px 6px rgba(0,0,0,0.1)",
+                    {renderBookImage(livre)}
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: "bold",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        fontSize: 14,
+                        textAlign: "left",
                       }}
-                    />
-                    <Typography variant="subtitle2" noWrap>
+                    >
                       {livre.Titre}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" noWrap>
+
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        fontSize: 12,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 1,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textAlign: "left",
+                      }}
+                    >
                       {livre.Auteur}
                     </Typography>
                   </Box>

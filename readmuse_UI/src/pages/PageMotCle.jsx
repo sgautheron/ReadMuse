@@ -63,7 +63,7 @@ const PageMotCle = () => {
   return (
     <Box sx={{ padding: 4 }}>
       {/* 🧠 Titre en bloc au-dessus */}
-      <Box sx={{ width: "100%", mb: 3, mt: 15 }}>
+      <Box sx={{ width: "100%", mb: 3, mt: 5 }}>
         <Typography variant="h4" fontWeight="bold" textAlign="center">
           Quand les lecteurs parlent de <em>« {motCle} »</em>
         </Typography>

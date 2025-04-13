@@ -32,8 +32,11 @@ stopwords_personnalises = {
     "fonctionner", "équilibre", "monde", "an", "king", "maîtriser", "parfaitement", "nouveau",
     "poing", "discours", "loin", "ouvrage", "idée", "siècle", "enjeu", "xix", "cas", "donnée", 
     "précieux", "vision", "domaine", "ensemble", "éclairer", "vivre", "document", "dater",
-    "voir", "durkheim", "bourdieu", "action", "manque", "Grishaverse", "écrivain"
-    }
+    "voir", "durkheim", "bourdieu", "action", "manque", "Grishaverse", "écrivain", "mêle", "autour", 
+    "chambre", "laisse", "huis", "mêler", "don", "bord", "terriblement", "plonger", "fil", "mont", 
+    "monte", "traite", "porter", "narration", "mal", "changer", "tisser", "croisé",
+      "aime", "sarah", "place", "travers", "littéraire" , "bleu" , "atmosphère", "interdire", "émotion",
+      "emporter", "pan"}
 
 # ✅ Nettoyage pour vectorisation (garde tous les mots pour permettre les bigrams)
 def nettoyer_avec_bigrams(texte: str) -> str:
@@ -90,7 +93,7 @@ def recommander_livres(description_utilisateur: str, db: Session, id_livre_exclu
 
     # 📊 Vectorisation TF-IDF + Similarité cosinus
     full_corpus = [description_propre] + corpus
-    vectorizer = TfidfVectorizer(ngram_range=(1, 2))
+    vectorizer = TfidfVectorizer(ngram_range=(1, 3))
     tfidf_matrix = vectorizer.fit_transform(full_corpus)
     scores = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
 

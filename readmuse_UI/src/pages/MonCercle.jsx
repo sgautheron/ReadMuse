@@ -10,6 +10,7 @@ import {
   ListItemText,
 } from "@mui/material";
 import { useUser } from "../context/UserContext";
+import { Link } from "react-router-dom";
 
 const MonCercle = () => {
   const { utilisateur } = useUser();
@@ -26,14 +27,22 @@ const MonCercle = () => {
   return (
     <Box sx={{ px: 4, pt: 10 }}>
       <Typography variant="h4" gutterBottom>
-        🌸 Mon Cercle de Lecture
+        Mon Cercle de Lecture
       </Typography>
 
       {membres.length > 0 ? (
         <List>
           {membres.map((membre) => (
             <Paper key={membre.id} sx={{ my: 1, p: 2 }}>
-              <ListItem>
+              <ListItem
+                component={Link}
+                to={`/utilisateur/${membre.id}`}
+                sx={{
+                  textDecoration: "none",
+                  color: "inherit",
+                  "&:hover": { backgroundColor: "#f5f5f5" },
+                }}
+              >
                 <ListItemAvatar>
                   <Avatar>{membre.nom[0]}</Avatar>
                 </ListItemAvatar>
@@ -43,9 +52,7 @@ const MonCercle = () => {
           ))}
         </List>
       ) : (
-        <Typography color="text.secondary">
-          Tu n'as encore ajouté personne à ton Cercle 🌱
-        </Typography>
+        <Typography color="text.secondary">Tu n'as encore ajouté personne à ton Cercle</Typography>
       )}
     </Box>
   );

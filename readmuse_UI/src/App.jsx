@@ -2,6 +2,7 @@ import { CssBaseline, Box } from "@mui/material";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./theme/theme";
+
 import Navbar from "./components/Navbar";
 import Accueil from "./pages/Accueil";
 import Formulaire from "./pages/Formulaire";
@@ -16,19 +17,28 @@ import Recommandations from "./pages/Recommandations";
 import PageMotCle from "./pages/PageMotCle";
 import ExplorationMotsCles from "./pages/ExplorationMotsCles";
 import ProfilPublic from "./pages/ProfilPublic";
-import MonCercle from "./pages/MonCercle"; // ✅ à ajouter si ce n'est pas déjà fait
+import MonCercle from "./pages/MonCercle";
 import SidebarConnecte from "./components/SidebarConnecte";
+import Bibliotheque from "./pages/Bibliotheque";
 
+import { SidebarProvider, useSidebar } from "./context/SidebarContext.jsx";
 import { UserProvider, useUser } from "./context/UserContext";
 
 function Layout() {
   const { utilisateur } = useUser();
+  const { isSidebarOpen } = useSidebar();
 
   return (
     <>
       <Navbar />
       {utilisateur && <SidebarConnecte />}
-      <Box sx={{ ml: utilisateur ? "230px" : 0, pt: 8 }}>
+      <Box
+        sx={{
+          ml: utilisateur ? (isSidebarOpen ? "230px" : "70px") : 0,
+          pt: 8,
+          transition: "margin-left 0.3s ease",
+        }}
+      >
         <Routes>
           <Route path="/" element={<Accueil />} />
           <Route path="/formulaire" element={<Formulaire />} />
@@ -44,6 +54,7 @@ function Layout() {
           <Route path="/utilisateur/:id" element={<ProfilPublic />} />
           <Route path="/motscles" element={<ExplorationMotsCles />} />
           <Route path="/mon-cercle" element={<MonCercle />} />
+          <Route path="/bibliotheque" element={<Bibliotheque />} />
         </Routes>
       </Box>
     </>
@@ -56,7 +67,9 @@ function App() {
       <CssBaseline />
       <Router>
         <UserProvider>
-          <Layout />
+          <SidebarProvider>
+            <Layout />
+          </SidebarProvider>
         </UserProvider>
       </Router>
     </ThemeProvider>

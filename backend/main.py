@@ -8,7 +8,7 @@ import unicodedata
 from datetime import datetime
 from collections import defaultdict, Counter
 from typing import List, Optional
-
+from sqlalchemy import func
 from backend.database import SessionLocal, engine, get_db
 from backend.models import Base, Livre, Interaction, Utilisateur, Favori
 from backend.schemas import InteractionCreate, InteractionOut, Description, ReviewOut
@@ -67,6 +67,54 @@ def get_livres(db: Session = Depends(get_db)):
         }
         for l in livres
     ]
+
+from sqlalchemy import func
+
+
+@app.get("/livres/top-commentes")
+def livres_plus_commentes(db: Session = Depends(get_db)):
+    livres = (
+        db.query(Livre)
+        .outerjoin(Interaction)
+        .group_by(Livre.ID_Livre)
+        .order_by(func.count(Interaction.ID_Interaction).desc())
+        .limit(3)
+        .all()
+    )
+    return livres
+
+@app.get("/livres/tri_popularite")
+def get_livres_trie_par_popularite(db: Session = Depends(get_db)):
+    resultats = (
+        db.query(Livre, func.count(Interaction.ID_Interaction).label("nb_interactions"))
+        .outerjoin(Interaction, Livre.ID_Livre == Interaction.ID_Livre)
+        .group_by(Livre.ID_Livre)
+        .order_by(func.count(Interaction.ID_Interaction).desc())
+        .all()
+    )
+
+    return [
+        {
+            "ID_Livre": livre.ID_Livre,
+            "Titre": livre.Titre,
+            "Auteur": livre.Auteur,
+            "Genre": livre.Genre,
+            "Resume": livre.Resume,
+            "Date_Publication": livre.Date_Publication,
+            "Editeur": livre.Editeur,
+            "Nombre_Pages": livre.Nombre_Pages,
+            "URL_Couverture": livre.URL_Couverture,
+            "nb_interactions": nb
+        }
+        for livre, nb in resultats
+    ]
+
+@app.get("/livres/top-ventes")
+def get_top_ventes(db: Session = Depends(get_db)):
+    livres = db.query(Livre).filter(Livre.Categorie == "Top ventes").all()
+    return livres
+
+
 
 @app.get("/livres/{id}", response_model=dict)
 def get_livre(id: int, db: Session = Depends(get_db)):
@@ -134,16 +182,6 @@ def get_livres_par_categorie():
 
     conn.close()
     return categories
-
-@app.get("/livres/populaires")
-def get_livres_par_popularite():
-    conn = sqlite3.connect("data/bdd_readmuse.db")
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM LivresParPopularite")
-    livres = cursor.fetchall()
-    conn.close()
-    return [dict(livre) for livre in livres]
 
 
 # ------------------------
@@ -309,12 +347,12 @@ def get_motcles_populaires(db: Session = Depends(get_db)):
 # ------------------------
 
 CATEGORIES_EMOTIONNELLES = {
-    "Pour pleurer un bon coup 😢": ["triste", "émouvant", "larmes", "deuil", "solitude"],
-    "Suspense haletant 🔥": ["suspense", "tension", "haletant", "thriller", "angoissant"],
-    "Écriture poétique ✨": ["poétique", "beau", "lyrique", "métaphore", "élégant"],
-    "Personnages torturés 🥀": ["complexe", "psychologique", "intense", "dérangeant"],
-    "Univers immersifs 🌍": ["magique", "imaginaire", "fascinant", "monde", "univers"],
-    "Histoire d’amour ❤️": ["amour", "romantique", "relation", "cœur", "sentiments"]
+    "Pour pleurer un bon coup": ["triste", "émouvant", "larmes", "deuil", "solitude"],
+    "Suspense haletant": ["suspense", "tension", "haletant", "thriller", "angoissant"],
+    "Écriture poétique": ["poétique", "beau", "lyrique", "métaphore", "élégant"],
+    "Personnages torturés": ["complexe", "psychologique", "intense", "dérangeant"],
+    "Univers immersifs": ["magique", "imaginaire", "fascinant", "monde", "univers"],
+    "Histoire d’amour": ["amour", "romantique", "relation", "cœur", "sentiments"]
 }
 
 @app.get("/exploration_emo")
@@ -412,9 +450,12 @@ def get_profil_litteraire(id_utilisateur: int, db: Session = Depends(get_db)):
     return {"profil": generer_profil_litteraire(descriptions)}
 
 
-
 @app.get("/utilisateurs/{id_utilisateur}/profil_emotionnel")
 def get_profil_emotionnel(id_utilisateur: int, db: Session = Depends(get_db)):
+    user = db.query(Utilisateur).filter(Utilisateur.ID_Utilisateur == id_utilisateur).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
     interactions = (
         db.query(Interaction.Description)
         .filter(Interaction.ID_Utilisateur == id_utilisateur)
@@ -423,12 +464,11 @@ def get_profil_emotionnel(id_utilisateur: int, db: Session = Depends(get_db)):
     descriptions = [desc.Description for desc in interactions if desc.Description]
 
     if not descriptions:
-        raise HTTPException(status_code=404, detail="Pas assez de descriptions pour générer un profil émotionnel.")
+        raise HTTPException(status_code=404, detail="Pas assez de descriptions.")
 
     texte_total = " ".join(descriptions)
     doc = nlp(texte_total.lower())
 
-    # Extraire les mots clés émotionnels
     lemmes = [
         token.lemma_.lower()
         for token in doc
@@ -439,8 +479,11 @@ def get_profil_emotionnel(id_utilisateur: int, db: Session = Depends(get_db)):
 
     return {
         "id_utilisateur": id_utilisateur,
+        "nom": user.Nom,
         "mots_cles_emotionnels": top_mots
     }
+
+
 @app.get("/utilisateurs/{id_utilisateur}/compatibilite_emotionnelle/{autre_id}")
 def get_compatibilite_emotionnelle(id_utilisateur: int, autre_id: int, db: Session = Depends(get_db)):
     def extraire_top_mots(uid: int, top_n=15):
@@ -497,7 +540,7 @@ def get_cercle(id_utilisateur: int, db: Session = Depends(get_db)):
         .all()
     )
     return [
-        {"id": m.ID_Utilisateur, "nom": m.Nom, "mail": m.Mail}
+        {"id": m.ID_Utilisateur, "nom": m.Nom, "email": m.Email}
         for m in membres
     ]
 
@@ -530,3 +573,4 @@ def get_cercle(id_utilisateur: int, db: Session = Depends(get_db)):
         }
         for membre in membres
     ]
+

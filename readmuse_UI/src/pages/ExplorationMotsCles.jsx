@@ -47,7 +47,7 @@ function ExplorationMotsCles() {
   const maxFreq = Math.max(...motsFiltres.map((m) => m.nb_livres), 1);
 
   return (
-    <Box sx={{ mt: 3, pt: 12, px: 2, backgroundColor: "#f5f0e6", minHeight: "100vh" }}>
+    <Box sx={{ mt: 5, pt: 12, px: 2, backgroundColor: "#f5f0e6", minHeight: "100vh" }}>
       <Typography variant="h1" gutterBottom>
         Exploration par mots-clés
       </Typography>
@@ -73,7 +73,7 @@ function ExplorationMotsCles() {
       </Select>
 
       <Typography variant="caption" sx={{ display: "block", mb: 2 }}>
-        {motsCles.length} mots-clés récupérés depuis le backend
+        {motsCles.length} mots-clés récupérés
       </Typography>
 
       {loading ? (

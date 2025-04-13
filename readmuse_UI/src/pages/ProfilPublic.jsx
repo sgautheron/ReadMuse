@@ -18,6 +18,7 @@ const ProfilPublic = () => {
   const { id } = useParams();
   const { utilisateur } = useUser();
   const [profil, setProfil] = useState(null);
+  const [nom, setNom] = useState(null);
   const [compatibilite, setCompatibilite] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
@@ -43,6 +44,7 @@ const ProfilPublic = () => {
         const res = await fetch(`http://127.0.0.1:8000/utilisateurs/${id}/profil_emotionnel`);
         const data = await res.json();
         setProfil(data.mots_cles_emotionnels);
+        setNom(data.nom);
 
         if (utilisateur?.ID_Utilisateur && utilisateur.ID_Utilisateur !== parseInt(id)) {
           const resCompat = await fetch(
@@ -102,7 +104,7 @@ const ProfilPublic = () => {
   return (
     <Box sx={{ padding: 4, maxWidth: "1200px", margin: "auto" }}>
       <Typography variant="h4" fontWeight="bold" gutterBottom>
-        Profil émotionnel de l'utilisateur {id}
+        Profil émotionnel de {nom}
       </Typography>
 
       {compatibilite && (

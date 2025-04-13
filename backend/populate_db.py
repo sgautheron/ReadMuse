@@ -1,5 +1,5 @@
 import sqlite3
-from fetch_books import fetch_books_from_openlibrary
+from scripts.fetch_books import fetch_books_from_openlibrary
 
 # Chemin vers la base de données
 DATABASE_PATH = "data/bdd_readmuse.db"  

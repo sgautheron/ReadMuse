@@ -51,45 +51,32 @@ function Profil() {
 
   return (
     <Box
-      sx={{ display: "flex", justifyContent: "center", gap: 6, mt: 15, mx: 4, flexWrap: "wrap" }}
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        gap: 6,
+        mt: 15,
+        mx: 4,
+        flexWrap: "wrap",
+      }}
     >
       {/* Bloc Profil */}
-      <Paper elevation={4} sx={{ p: 4, width: 500, borderRadius: 4 }}>
+      <Paper elevation={4} sx={{ p: 4, width: 500, borderRadius: 4, height: "fit-content" }}>
         <Typography variant="h4" gutterBottom>
           Mon Profil
         </Typography>
 
-        <Typography variant="subtitle1">👤 Nom : {utilisateur?.Nom}</Typography>
-        <Typography variant="subtitle1">📧 Email : {utilisateur?.Email}</Typography>
+        <Typography variant="subtitle1">Nom : {utilisateur?.Nom}</Typography>
+        <Typography variant="subtitle1">Email : {utilisateur?.Email}</Typography>
 
         <Button color="error" onClick={handleLogout} sx={{ mt: 2 }}>
           Se déconnecter
         </Button>
-
-        <Divider sx={{ my: 4 }} />
-
-        <Typography variant="h5" gutterBottom>
-          Historique de mes lectures
-        </Typography>
-
-        {interactions.length === 0 ? (
-          <Typography color="text.secondary">Aucune interaction enregistrée.</Typography>
-        ) : (
-          interactions.map((item) => (
-            <Paper key={item.ID_Interaction} sx={{ p: 2, mb: 4, borderRadius: 3 }}>
-              <Typography variant="h6">{item.Titre}</Typography>
-              <Typography variant="body2" color="text.secondary" mb={1}>
-                {new Date(item.Date_Interaction).toLocaleDateString()}
-              </Typography>
-              <Typography>{item.Description}</Typography>
-            </Paper>
-          ))
-        )}
       </Paper>
 
       {/* Bloc Favoris + Stats + Profil IA */}
       <Box sx={{ width: 600 }}>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
+        <Typography variant="h4" gutterBottom>
           Mes livres favoris
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
@@ -138,13 +125,13 @@ function Profil() {
 
         <Divider sx={{ my: 4 }} />
         {/* Bloc Statistiques */}
-        <Typography variant="h5" gutterBottom>
-          📊 Statistiques de lecture
+        <Typography variant="h4" gutterBottom>
+          Statistiques de lecture
         </Typography>
         {stats ? (
           <Box sx={{ mb: 3 }}>
-            <Typography>📚 Livres lus : {stats.livres_distincts}</Typography>
-            <Typography>📝 Total d’interactions : {stats.total_interactions}</Typography>
+            <Typography>Livres lus : {stats.livres_distincts}</Typography>
+            <Typography>Total d’interactions : {stats.total_interactions}</Typography>
           </Box>
         ) : (
           <Typography color="text.secondary">Chargement des statistiques...</Typography>
@@ -152,8 +139,8 @@ function Profil() {
 
         <Divider sx={{ my: 4 }} />
         {/* Bloc Profil IA */}
-        <Typography variant="h5" gutterBottom>
-          🤖 Mon profil littéraire généré par l’IA
+        <Typography variant="h4" gutterBottom>
+          Mon profil littéraire généré par l’IA
         </Typography>
         {profilIA ? (
           <Paper sx={{ p: 2, backgroundColor: "#f5f0e6", borderRadius: 3 }}>

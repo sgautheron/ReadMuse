@@ -3,9 +3,11 @@ from backend.database import SessionLocal
 from backend.models import Livre, Interaction
 from backend.themes import themes
 import spacy
-import os
 
-# ✅ Chargement de spaCy
+# ✅ Tous les thèmes sont pris en compte
+themes_importants = set(themes.keys())
+
+# ✅ Chargement du modèle spaCy
 nlp = spacy.load("fr_core_news_sm")
 
 def nettoyer_texte(texte):
@@ -20,7 +22,7 @@ def detecter_themes_pondérés(mots, themes):
                 compteur[mot] += 1
     return compteur
 
-# ✅ Connexion à la base de données
+# ✅ Connexion à la BDD
 db = SessionLocal()
 livres = db.query(Livre).all()
 
