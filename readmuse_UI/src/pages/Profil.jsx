@@ -1,24 +1,35 @@
+// Hooks React
 import { useEffect, useState } from "react";
+
+// Composants Material UI
 import { Box, Typography, Paper, Button, Divider } from "@mui/material";
+
+// Navigation et gestion de lien
 import { useNavigate, Link } from "react-router-dom";
+
+// Contexte utilisateur global
 import { useUser } from "../context/UserContext";
 
 function Profil() {
-  const { utilisateur, setUtilisateur } = useUser();
+  const { utilisateur, setUtilisateur } = useUser(); // 👤 Données utilisateur globales
   const navigate = useNavigate();
+
+  // États pour les données utilisateur
   const [interactions, setInteractions] = useState([]);
   const [favoris, setFavoris] = useState([]);
   const [stats, setStats] = useState(null);
-  const [profilIA, setProfilIA] = useState(null); // 👈 important
+  const [profilIA, setProfilIA] = useState(null); // 🧠 Profil généré automatiquement
 
+  // Chargement des données dès que l’utilisateur est connecté
   useEffect(() => {
     if (!utilisateur) {
-      navigate("/login");
+      navigate("/login"); // Redirige si non connecté
       return;
     }
 
     const fetchData = async () => {
       try {
+        // Appels multiples en parallèle
         const [resFavoris, resInteractions, resStats, resProfilIA] = await Promise.all([
           fetch(`http://127.0.0.1:8000/favoris/${utilisateur.ID_Utilisateur}`),
           fetch(`http://127.0.0.1:8000/interactions/${utilisateur.ID_Utilisateur}`),
@@ -26,15 +37,17 @@ function Profil() {
           fetch(`http://127.0.0.1:8000/utilisateurs/${utilisateur.ID_Utilisateur}/profil_ia`),
         ]);
 
+        // Transformation des données
         const favorisData = await resFavoris.json();
         const interactionsData = await resInteractions.json();
         const statsData = await resStats.json();
-        const profilIAData = await resProfilIA.json(); // 👈 c’est ici que tu avais une erreur
+        const profilIAData = await resProfilIA.json();
 
+        // Mise à jour des états
         setFavoris(favorisData);
         setInteractions(Array.isArray(interactionsData) ? interactionsData : []);
         setStats(statsData);
-        setProfilIA(profilIAData.profil); // 👈 tu dois extraire `.profil` ici
+        setProfilIA(profilIAData.profil); // Extraction du champ "profil"
       } catch (err) {
         console.error("Erreur lors du chargement des données", err);
       }
@@ -43,6 +56,7 @@ function Profil() {
     fetchData();
   }, [utilisateur, navigate]);
 
+  // Déconnexion simple
   const handleLogout = () => {
     localStorage.removeItem("utilisateur");
     setUtilisateur(null);
@@ -60,12 +74,11 @@ function Profil() {
         flexWrap: "wrap",
       }}
     >
-      {/* Bloc Profil */}
+      {/* Carte profil utilisateur */}
       <Paper elevation={4} sx={{ p: 4, width: 500, borderRadius: 4, height: "fit-content" }}>
         <Typography variant="h4" gutterBottom>
           Mon Profil
         </Typography>
-
         <Typography variant="subtitle1">Nom : {utilisateur?.Nom}</Typography>
         <Typography variant="subtitle1">Email : {utilisateur?.Email}</Typography>
 
@@ -74,8 +87,9 @@ function Profil() {
         </Button>
       </Paper>
 
-      {/* Bloc Favoris + Stats + Profil IA */}
+      {/* Partie droite : favoris, stats, IA */}
       <Box sx={{ width: 600 }}>
+        {/* Favoris */}
         <Typography variant="h4" gutterBottom>
           Mes livres favoris
         </Typography>
@@ -124,7 +138,8 @@ function Profil() {
         </Box>
 
         <Divider sx={{ my: 4 }} />
-        {/* Bloc Statistiques */}
+
+        {/* Statistiques utilisateur */}
         <Typography variant="h4" gutterBottom>
           Statistiques de lecture
         </Typography>
@@ -138,7 +153,8 @@ function Profil() {
         )}
 
         <Divider sx={{ my: 4 }} />
-        {/* Bloc Profil IA */}
+
+        {/* Profil IA */}
         <Typography variant="h4" gutterBottom>
           Mon profil littéraire généré par l’IA
         </Typography>

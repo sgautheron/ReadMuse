@@ -50,4 +50,4 @@ for livre in livres:
 
 db.commit()
 db.close()
-print(f"✅ Mots-clés mis à jour pour {livres_modifiés} livres.")
+print(f"Mots-clés mis à jour pour {livres_modifiés} livres.")

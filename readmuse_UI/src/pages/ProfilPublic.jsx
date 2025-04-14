@@ -1,5 +1,8 @@
+// Import React & hooks
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+
+// Composants MUI
 import {
   Box,
   Typography,
@@ -11,20 +14,27 @@ import {
   Snackbar,
   Alert,
 } from "@mui/material";
+
 import FavoriteIcon from "@mui/icons-material/Favorite";
+
+// Context & routing
 import { useUser } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 
 const ProfilPublic = () => {
+  // ID de l'utilisateur dont on consulte le profil
   const { id } = useParams();
-  const { utilisateur } = useUser();
-  const [profil, setProfil] = useState(null);
-  const [nom, setNom] = useState(null);
-  const [compatibilite, setCompatibilite] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [message, setMessage] = useState(null);
+  const { utilisateur } = useUser(); // 👤 Utilisateur actuellement connecté
   const navigate = useNavigate();
 
+  // États pour stocker les infos du profil public
+  const [profil, setProfil] = useState(null); // mots-clés émotionnels
+  const [nom, setNom] = useState(null);
+  const [compatibilite, setCompatibilite] = useState(null); // score avec l'utilisateur actuel
+  const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState(null); // feedback utilisateur
+
+  // Couleurs pastel pour les mots-clés
   const pastelColors = [
     "#ffe5ec",
     "#e0f7fa",
@@ -35,11 +45,13 @@ const ProfilPublic = () => {
     "#cdeffd",
   ];
 
+  // Fonction pour attribuer une couleur à un mot
   const getColor = (str) => {
     const hash = [...str].reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return pastelColors[hash % pastelColors.length];
   };
 
+  // Chargement du profil public et calcul de compatibilité émotionnelle
   useEffect(() => {
     const fetchProfil = async () => {
       try {
@@ -48,6 +60,7 @@ const ProfilPublic = () => {
         setProfil(data.mots_cles_emotionnels);
         setNom(data.nom);
 
+        // Si on consulte un autre profil que le sien, calcul de compatibilité
         if (utilisateur?.ID_Utilisateur && utilisateur.ID_Utilisateur !== parseInt(id)) {
           const resCompat = await fetch(
             `http://127.0.0.1:8000/utilisateurs/${utilisateur.ID_Utilisateur}/compatibilite_emotionnelle/${id}`
@@ -69,13 +82,12 @@ const ProfilPublic = () => {
     fetchProfil();
   }, [id, utilisateur]);
 
+  // Ajout à son cercle
   const handleRejoindreCercle = async () => {
     try {
       const res = await fetch(
         `http://127.0.0.1:8000/cercle/${utilisateur.ID_Utilisateur}/ajouter/${id}`,
-        {
-          method: "POST",
-        }
+        { method: "POST" }
       );
       const data = await res.json();
       setMessage(data.message || "Ajout effectué !");
@@ -85,6 +97,7 @@ const ProfilPublic = () => {
     }
   };
 
+  // Loading
   if (loading) {
     return (
       <Box textAlign="center" mt={8}>
@@ -93,10 +106,12 @@ const ProfilPublic = () => {
     );
   }
 
+  // Aucun profil trouvé
   if (!profil) {
     return <Typography textAlign="center">Profil non disponible.</Typography>;
   }
 
+  // Texte explicatif de compatibilité
   const getInterprétation = (score) => {
     if (score > 50) return "Vos sensibilités semblent vibrer en harmonie.";
     if (score > 20) return "Quelques affinités se dégagent de vos lectures.";
@@ -105,10 +120,12 @@ const ProfilPublic = () => {
 
   return (
     <Box sx={{ padding: 4, maxWidth: "1200px", margin: "auto" }}>
+      {/* Titre du profil */}
       <Typography variant="h4" fontWeight="bold" gutterBottom>
         Profil émotionnel de {nom}
       </Typography>
 
+      {/* Compatibilité avec l'utilisateur connecté */}
       {compatibilite && (
         <Paper
           elevation={2}
@@ -124,6 +141,7 @@ const ProfilPublic = () => {
             Compatibilité émotionnelle : <strong>{compatibilite.score}%</strong>
           </Typography>
 
+          {/* Barre de progression */}
           <Box sx={{ mt: 2, mb: 2 }}>
             <LinearProgress
               variant="determinate"
@@ -143,6 +161,7 @@ const ProfilPublic = () => {
             {getInterprétation(compatibilite.score)}
           </Typography>
 
+          {/* Mots communs affichés */}
           {compatibilite.mots?.length > 0 && (
             <Typography variant="body1" sx={{ mt: 2 }}>
               Vous avez été touché·es par des thèmes similaires :{" "}
@@ -152,6 +171,7 @@ const ProfilPublic = () => {
         </Paper>
       )}
 
+      {/* Mots-clés émotionnels du profil consulté */}
       <Typography variant="h6" sx={{ mb: 1 }}>
         Mots-clés émotionnels les plus utilisés
       </Typography>
@@ -175,6 +195,7 @@ const ProfilPublic = () => {
         ))}
       </Paper>
 
+      {/* Bouton d’ajout au Cercle */}
       {utilisateur?.ID_Utilisateur && utilisateur.ID_Utilisateur !== parseInt(id) && (
         <Box sx={{ textAlign: "center", mt: 4 }}>
           <Button
@@ -196,6 +217,7 @@ const ProfilPublic = () => {
         </Box>
       )}
 
+      {/* Snackbar feedback */}
       <Snackbar
         open={!!message}
         autoHideDuration={4000}

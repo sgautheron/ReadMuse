@@ -6,10 +6,8 @@ import theme from "./theme/theme";
 import Navbar from "./components/Navbar";
 import Accueil from "./pages/Accueil";
 import Formulaire from "./pages/Formulaire";
-import Exploration from "./pages/Exploration";
 import ExplorationEmotionnelle from "./pages/ExplorationEmotionnelle";
 import Profil from "./pages/Profil";
-import About from "./pages/About";
 import DetailsLivre from "./pages/DetailsLivre";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -42,9 +40,7 @@ function Layout() {
         <Routes>
           <Route path="/" element={<Accueil />} />
           <Route path="/formulaire" element={<Formulaire />} />
-          <Route path="/exploration" element={<Exploration />} />
           <Route path="/profil" element={<Profil />} />
-          <Route path="/about" element={<About />} />
           <Route path="/livre/:id" element={<DetailsLivre />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

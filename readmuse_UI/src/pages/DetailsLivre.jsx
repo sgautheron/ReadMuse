@@ -1,3 +1,4 @@
+// Imports nécessaires
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { fetchLivreById, fetchReviewsByBookId } from "../api/livres";
@@ -7,8 +8,12 @@ import { useUser } from "../context/UserContext";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
+// Composant principal : page de détails d’un livre (infos + avis + favoris)
 const DétailsLivre = () => {
+  // Récupère l’ID du livre depuis l’URL
   const { id } = useParams();
+
+  // États du composant
   const [livre, setLivre] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [motsClesAvis, setMotsClesAvis] = useState([]);
@@ -16,6 +21,7 @@ const DétailsLivre = () => {
   const { utilisateur } = useUser();
   const [isFavori, setIsFavori] = useState(false);
 
+  // Palette de couleurs pastel aléatoires pour les mots-clés
   const pastelColors = [
     "#ffe5ec",
     "#e0f7fa",
@@ -26,32 +32,39 @@ const DétailsLivre = () => {
     "#cdeffd",
   ];
 
+  // Fonction utilitaire pour choisir une couleur en fonction d’un mot-clé
   const getPastelColor = (str) => {
     const hash = [...str].reduce((acc, char) => acc + char.charCodeAt(0), 0);
     return pastelColors[hash % pastelColors.length];
   };
 
+  // Effet déclenché au chargement ou quand l’ID du livre change
   useEffect(() => {
+    // 🔁 Récupération des données du livre
     const getLivre = async () => {
       const data = await fetchLivreById(id);
       setLivre(data);
     };
 
+    // Récupération des avis utilisateurs
     const getReviews = async () => {
       const data = await fetchReviewsByBookId(id);
       setReviews(data);
     };
 
+    // Récupération des mots-clés extraits des avis
     const getMotsCles = async () => {
       const res = await fetch(`http://127.0.0.1:8000/livres/${id}/motcles_avis`);
       const data = await res.json();
       setMotsClesAvis(data.motcles);
     };
 
+    // Lancement des trois requêtes
     getLivre();
     getReviews();
     getMotsCles();
 
+    // 🔁 Vérifie si le livre est déjà dans les favoris de l’utilisateur
     if (utilisateur) {
       fetch(`http://127.0.0.1:8000/favoris/${utilisateur.ID_Utilisateur}`)
         .then((res) => res.json())
@@ -63,6 +76,7 @@ const DétailsLivre = () => {
     }
   }, [id]);
 
+  // Ajoute ou retire le livre des favoris
   const handleToggleFavori = async () => {
     if (!utilisateur) {
       navigate("/login");
@@ -83,18 +97,22 @@ const DétailsLivre = () => {
     }
   };
 
+  // Affichage d’un message pendant le chargement
   if (!livre) {
     return <Typography textAlign="center">Chargement...</Typography>;
   }
 
+  // Rendu principal
   return (
     <>
+      {/* ⬅Bouton retour */}
       <Box sx={{ position: "absolute", top: 120, left: 80 }}>
         <IconButton onClick={() => navigate("/exploration-emo")} color="primary">
           <ArrowBackIcon />
         </IconButton>
       </Box>
 
+      {/* Contenu principal en deux colonnes : infos à gauche, avis à droite */}
       <Box
         sx={{
           padding: 4,
@@ -107,7 +125,7 @@ const DétailsLivre = () => {
           alignItems: "flex-start",
         }}
       >
-        {/* Détails */}
+        {/* Infos sur le livre */}
         <Box sx={{ flex: 1, minWidth: "300px" }}>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
             {livre.Titre}
@@ -127,6 +145,7 @@ const DétailsLivre = () => {
                 }}
               />
             )}
+            {/* Bouton favori */}
             <Button
               onClick={handleToggleFavori}
               startIcon={isFavori ? <FavoriteIcon /> : <FavoriteBorderIcon />}
@@ -136,6 +155,7 @@ const DétailsLivre = () => {
             </Button>
           </Box>
 
+          {/* Résumé du livre */}
           <Typography variant="h5" gutterBottom>
             Résumé
           </Typography>
@@ -144,8 +164,9 @@ const DétailsLivre = () => {
           </Paper>
         </Box>
 
-        {/* Mots-clés & avis */}
+        {/* Mots-clés & Avis */}
         <Box sx={{ flex: 1, minWidth: "300px" }}>
+          {/* Mots-clés extraits des avis */}
           <Typography variant="h5" gutterBottom>
             Mots-clés issus des avis
           </Typography>
@@ -183,6 +204,7 @@ const DétailsLivre = () => {
             )}
           </Box>
 
+          {/* Liste des avis utilisateurs */}
           <Typography variant="h5" gutterBottom>
             Avis des lecteurs
           </Typography>
@@ -209,6 +231,7 @@ const DétailsLivre = () => {
             <Typography color="text.secondary">Aucun avis pour ce livre.</Typography>
           )}
 
+          {/* Lien vers le formulaire d’avis */}
           <Button sx={{ mt: 2 }} onClick={() => navigate("/formulaire")}>
             Laisser un avis
           </Button>
@@ -218,4 +241,5 @@ const DétailsLivre = () => {
   );
 };
 
+// Export du composant pour l’utiliser dans les routes
 export default DétailsLivre;

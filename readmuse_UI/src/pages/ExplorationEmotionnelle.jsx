@@ -1,3 +1,4 @@
+// Hooks et librairies nécessaires
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Box, Typography, TextField } from "@mui/material";
@@ -5,13 +6,16 @@ import { useNavigate } from "react-router-dom";
 import ScrollContainer from "react-indiana-drag-scroll";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 
+// Composant principal d’exploration émotionnelle
 function ExplorationEmotionnelle() {
+  // États pour stocker les livres par catégorie, tous les livres, top ventes, et la recherche
   const [categories, setCategories] = useState([]);
   const [allBooks, setAllBooks] = useState([]);
   const [topVentes, setTopVentes] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
+  // Récupération des données depuis l’API au chargement
   useEffect(() => {
     axios.get("http://localhost:8000/exploration_emo").then((res) => {
       setCategories(res.data);
@@ -26,12 +30,14 @@ function ExplorationEmotionnelle() {
     });
   }, []);
 
+  // Filtrage des livres par recherche utilisateur
   const filteredBooks = allBooks.filter((livre) =>
     livre.Titre.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const showSearchResults = searchQuery.trim().length > 0;
 
+  // Fonction utilitaire pour afficher la couverture ou une icône par défaut
   const renderBookImage = (livre) => {
     const hasCover = livre.URL_Couverture && livre.URL_Couverture !== "";
     return hasCover ? (
@@ -57,7 +63,7 @@ function ExplorationEmotionnelle() {
           width: "100%",
           height: 200,
           borderRadius: 2,
-          backgroundColor: "#f5f0e6", // ✅ couleur de fond assortie
+          backgroundColor: "#f5f0e6",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -69,12 +75,15 @@ function ExplorationEmotionnelle() {
     );
   };
 
+  // Rendu principal
   return (
     <Box sx={{ px: 3, pt: 12, backgroundColor: "#f5f0e6", minHeight: "100vh" }}>
+      {/* Titre principal */}
       <Typography variant="h1" gutterBottom>
         Explorer les livres par émotions
       </Typography>
 
+      {/* Champ de recherche */}
       <TextField
         label="Rechercher un livre"
         variant="outlined"
@@ -84,7 +93,7 @@ function ExplorationEmotionnelle() {
         sx={{ my: 3 }}
       />
 
-      {/* Section Top Ventes */}
+      {/* Section : Top ventes */}
       {!showSearchResults && topVentes.length > 0 && (
         <Box sx={{ mb: 6 }}>
           <Typography variant="h2" sx={{ mb: 2 }}>
@@ -119,7 +128,6 @@ function ExplorationEmotionnelle() {
                   >
                     {livre.Titre}
                   </Typography>
-
                   <Typography
                     variant="caption"
                     color="text.secondary"
@@ -178,7 +186,6 @@ function ExplorationEmotionnelle() {
                     >
                       {livre.Titre}
                     </Typography>
-
                     <Typography
                       variant="caption"
                       color="text.secondary"
@@ -204,12 +211,12 @@ function ExplorationEmotionnelle() {
         </Box>
       )}
 
-      {/* Exploration émotionnelle */}
+      {/* Section : Exploration émotionnelle */}
       {!showSearchResults &&
         categories.map((cat) => (
           <Box key={cat.categorie} sx={{ mb: 6 }}>
             <Typography variant="h2" sx={{ mb: 2 }}>
-              {cat.categorie}{" "}
+              {cat.categorie}
             </Typography>
             <ScrollContainer className="scroll-container" horizontal>
               <Box sx={{ display: "flex", gap: 2 }}>
@@ -240,7 +247,6 @@ function ExplorationEmotionnelle() {
                     >
                       {livre.Titre}
                     </Typography>
-
                     <Typography
                       variant="caption"
                       color="text.secondary"
@@ -266,4 +272,5 @@ function ExplorationEmotionnelle() {
   );
 }
 
+// Export du composant
 export default ExplorationEmotionnelle;

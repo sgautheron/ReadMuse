@@ -1,3 +1,4 @@
+// 🔁 Récupère tous les livres disponibles depuis l’API
 export const fetchLivres = async () => {
   try {
     console.log("📡 Tentative de récupération des livres depuis l'API...");
@@ -16,6 +17,7 @@ export const fetchLivres = async () => {
   }
 };
 
+// 📖 Récupère les détails d’un livre spécifique à partir de son ID
 export const fetchLivreById = async (id) => {
   try {
     console.log(`📡 Récupération du livre ID ${id}...`);
@@ -40,6 +42,7 @@ export const fetchLivreById = async (id) => {
   }
 };
 
+// 🗣️ Récupère les avis (commentaires) associés à un livre donné (via son ID)
 export const fetchReviewsByBookId = async (id) => {
   try {
     const response = await fetch(`http://localhost:8000/livres/${id}/reviews`);
@@ -50,6 +53,7 @@ export const fetchReviewsByBookId = async (id) => {
   }
 };
 
+// 🌟 Récupère tous les livres triés par popularité décroissante (en fonction du nombre d’interactions)
 export const fetchLivresParPopularite = async () => {
   try {
     console.log("📡 Récupération dynamique des livres triés par popularité...");

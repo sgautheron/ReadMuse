@@ -5,10 +5,10 @@ from backend.models import Livre, Interaction
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# 🔧 Chargement du modèle SpaCy français
+# Chargement du modèle SpaCy français
 nlp = spacy.load("fr_core_news_sm")
 
-# ❌ Stopwords personnalisés à exclure (trop vagues ou trop fréquents)
+# Stopwords personnalisés à exclure (trop vagues ou trop fréquents)
 stopwords_personnalises = {
     "livre", "adorer", "lecture", "histoire", "roman", "personnage", "aimer", "bouquin", "lu",
     "ambiance", "univers", "intrigue", "plu", "plaire", "thème", "récit", "parle", "sujet",
@@ -39,7 +39,7 @@ stopwords_personnalises = {
       "emporter", "pan", "besoin", "levy", "marc", "écrire", "veux", "mcfadden", "rien", "venir", "coben", 
       "doser", "ecrire", "mélissa", "signe", "dimension", "touchée", "fonce", "joue", "sebald", "Millie"}
 
-# ✅ Nettoyage pour vectorisation (garde tous les mots pour permettre les bigrams)
+# Nettoyage pour vectorisation (garde tous les mots pour permettre les bigrams)
 def nettoyer_avec_bigrams(texte: str) -> str:
     doc = nlp(texte.lower())
     tokens = [
@@ -48,7 +48,7 @@ def nettoyer_avec_bigrams(texte: str) -> str:
     ]
     return " ".join(tokens)
 
-# ✅ Extraction d’unigrams et bigrams (sans stopwords) pour comparaison humaine
+# Extraction d’unigrams et bigrams (sans stopwords) pour comparaison humaine
 def extraire_ngrams(texte: str, n: int = 2) -> set[str]:
     doc = nlp(texte.lower())
     tokens = [
@@ -60,7 +60,7 @@ def extraire_ngrams(texte: str, n: int = 2) -> set[str]:
         for i in range(len(tokens) - n + 1)
     )
 
-# ✅ Extraction des mots-clés humains en commun (avec filtre sur les unigrams)
+# Extraction des mots-clés humains en commun (avec filtre sur les unigrams)
 def extraire_mots_communs_humains(texte1: str, texte2: str) -> list[str]:
     unigrams1 = extraire_ngrams(texte1, 1)
     unigrams2 = extraire_ngrams(texte2, 1)
@@ -74,11 +74,11 @@ def extraire_mots_communs_humains(texte1: str, texte2: str) -> list[str]:
 
     return sorted(mots_uni_filtrés + list(mots_bi))
 
-# ✅ Fonction principale de recommandation
+# Fonction principale de recommandation
 def recommander_livres(description_utilisateur: str, db: Session, id_livre_exclu: Optional[int] = None):
     interactions = db.query(Interaction).all()
 
-    # 🔁 Regrouper les descriptions par livre (en excluant le livre décrit)
+    # Regrouper les descriptions par livre (en excluant le livre décrit)
     livre_to_descs = {}
     for inter in interactions:
         if inter.ID_Livre != id_livre_exclu:
@@ -92,7 +92,7 @@ def recommander_livres(description_utilisateur: str, db: Session, id_livre_exclu
     if corpus:
         print("CORPUS[0] NETTOYÉ :", corpus[0])
 
-    # 📊 Vectorisation TF-IDF + Similarité cosinus
+    # Vectorisation TF-IDF + Similarité cosinus
     full_corpus = [description_propre] + corpus
     vectorizer = TfidfVectorizer(ngram_range=(1, 3))
     tfidf_matrix = vectorizer.fit_transform(full_corpus)

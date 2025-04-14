@@ -39,16 +39,21 @@ Base.metadata.create_all(bind=engine)
 # Authentification
 app.include_router(auth_router)
 
+# ------------------------
 # Accueil
+# ------------------------
+
+# Retourne un message de bienvenue pour tester si l’API fonctionne
 @app.get("/")
 def home():
     return {"message": "Bienvenue sur l'API ReadMuse !"}
 
 
 # ------------------------
-# 📚 Gestion des livres
+# Gestion des livres
 # ------------------------
 
+# Récupère la liste complète de tous les livres présents dans la base
 @app.get("/livres/", response_model=List[dict])
 def get_livres(db: Session = Depends(get_db)):
     livres = db.query(Livre).all()
@@ -68,9 +73,8 @@ def get_livres(db: Session = Depends(get_db)):
         for l in livres
     ]
 
-from sqlalchemy import func
 
-
+# Retourne les 3 livres ayant reçu le plus de commentaires utilisateurs
 @app.get("/livres/top-commentes")
 def livres_plus_commentes(db: Session = Depends(get_db)):
     livres = (
@@ -83,6 +87,8 @@ def livres_plus_commentes(db: Session = Depends(get_db)):
     )
     return livres
 
+
+# Retourne tous les livres triés par nombre d'interactions décroissant (popularité)
 @app.get("/livres/tri_popularite")
 def get_livres_trie_par_popularite(db: Session = Depends(get_db)):
     resultats = (
@@ -109,13 +115,15 @@ def get_livres_trie_par_popularite(db: Session = Depends(get_db)):
         for livre, nb in resultats
     ]
 
+
+# Retourne tous les livres appartenant à la catégorie "Top ventes"
 @app.get("/livres/top-ventes")
 def get_top_ventes(db: Session = Depends(get_db)):
     livres = db.query(Livre).filter(Livre.Categorie == "Top ventes").all()
     return livres
 
 
-
+# Retourne les détails d’un livre (via son ID), ainsi que les mots-clés les plus fréquents dans les commentaires
 @app.get("/livres/{id}", response_model=dict)
 def get_livre(id: int, db: Session = Depends(get_db)):
     livre = db.query(Livre).filter(Livre.ID_Livre == id).first()
@@ -157,6 +165,7 @@ def get_livre(id: int, db: Session = Depends(get_db)):
     }
 
 
+# Regroupe tous les livres de la base par catégorie, avec lecture directe en SQLite
 @app.get("/livres/par_categorie")
 def get_livres_par_categorie():
     conn = sqlite3.connect("data/bdd_readmuse.db")
@@ -183,11 +192,11 @@ def get_livres_par_categorie():
     conn.close()
     return categories
 
-
 # ------------------------
-# ✏️ Interactions utilisateur
+# Interactions utilisateur
 # ------------------------
 
+# Crée une nouvelle interaction (commentaire et/ou note) pour un livre donné
 @app.post("/interactions/")
 def create_interaction(interaction: InteractionCreate, db: Session = Depends(get_db)):
     new_interaction = Interaction(
@@ -202,6 +211,8 @@ def create_interaction(interaction: InteractionCreate, db: Session = Depends(get
     db.refresh(new_interaction)
     return {"message": "Interaction enregistrée avec succès", "id": new_interaction.ID_Interaction}
 
+
+# Récupère toutes les interactions (commentaires + dates) d’un utilisateur donné
 @app.get("/interactions/{id_utilisateur}", response_model=List[InteractionOut])
 def get_interactions_by_user(id_utilisateur: int, db: Session = Depends(get_db)):
     interactions = (
@@ -213,6 +224,8 @@ def get_interactions_by_user(id_utilisateur: int, db: Session = Depends(get_db))
     )
     return interactions
 
+
+# Récupère tous les avis/commentaires associés à un livre (avec nom de l’utilisateur)
 @app.get("/livres/{id}/reviews", response_model=List[ReviewOut])
 def get_reviews_by_book(id: int, db: Session = Depends(get_db)):
     reviews = (
@@ -234,20 +247,21 @@ def get_reviews_by_book(id: int, db: Session = Depends(get_db)):
 
 
 # ------------------------
-# Recommandation
+# 🔮 Recommandation
 # ------------------------
 
-# ✅ Route recommandation
+# Retourne des recommandations personnalisées à partir d’une description texte utilisateur
 @app.post("/api/recommander")
 def recommander(description: Description, db: Session = Depends(get_db)):
     recommandations = recommander_livres(description.texte, db)
     return {"recommandations": recommandations}
 
+
 # ------------------------
 # Exploration mots-clés
 # ------------------------
 
-# ✅ Normalisation texte pour comparaison
+# Fonction utilitaire pour nettoyer un texte (suppression accents, ponctuation, etc.)
 def normaliser_texte(txt: str) -> str:
     txt = unicodedata.normalize('NFD', txt)
     txt = ''.join(c for c in txt if unicodedata.category(c) != 'Mn')
@@ -255,7 +269,7 @@ def normaliser_texte(txt: str) -> str:
     return txt.strip().lower()
 
 
-# ✅ Route : livres associés à un mot-clé
+# Recherche tous les livres associés à un mot-clé (présent dans les descriptions utilisateurs)
 @app.get("/livres/motcle/{mot}")
 def get_livres_depuis_descriptions(mot: str, db: Session = Depends(get_db)):
     mot_normalise = normaliser_texte(mot)
@@ -285,7 +299,8 @@ def get_livres_depuis_descriptions(mot: str, db: Session = Depends(get_db)):
         } for l in livres_trouves.values()]
     }
 
-# ✅ Route : top mots-clés d’un livre
+
+# Analyse les commentaires d’un livre et retourne les 10 mots-clés les plus fréquents
 @app.get("/livres/{id}/motcles_avis")
 def get_mots_cles_par_livre(id: int, db: Session = Depends(get_db)):
     interactions = db.query(Interaction.Description).filter(Interaction.ID_Livre == id).all()
@@ -312,7 +327,8 @@ def get_mots_cles_par_livre(id: int, db: Session = Depends(get_db)):
         "descriptions": descriptions
     }
 
-# ✅ Route : mots-clés populaires (globaux)
+
+# Calcule les mots-clés les plus fréquents dans toutes les descriptions utilisateurs (min 3 occurrences)
 @app.get("/motcles_populaires")
 def get_motcles_populaires(db: Session = Depends(get_db)):
     descriptions = [i.Description for i in db.query(Interaction).all()]
@@ -339,6 +355,7 @@ def get_motcles_populaires(db: Session = Depends(get_db)):
 # Exploration émotionnelle
 # ------------------------
 
+# Catégories émotionnelles pré-définies et les mots-clés associés
 CATEGORIES_EMOTIONNELLES = {
     "Pour pleurer un bon coup": ["triste", "émouvant", "larmes", "deuil", "solitude"],
     "Suspense haletant": ["suspense", "tension", "haletant", "thriller", "angoissant"],
@@ -348,6 +365,7 @@ CATEGORIES_EMOTIONNELLES = {
     "Histoire d’amour": ["amour", "romantique", "relation", "cœur", "sentiments"]
 }
 
+# Regroupe les livres selon les émotions évoquées dans les commentaires utilisateurs
 @app.get("/exploration_emo")
 def get_categories_emotionnelles(db: Session = Depends(get_db)):
     interactions = db.query(Interaction).all()
@@ -378,8 +396,11 @@ def get_categories_emotionnelles(db: Session = Depends(get_db)):
     return categories
 
 
+# ------------------------
+# Gestion des favoris
+# ------------------------
 
-
+# Ajoute un livre aux favoris d’un utilisateur
 @app.post("/favoris/")
 def ajouter_favori(id_utilisateur: int, id_livre: int, db: Session = Depends(get_db)):
     favori = Favori(ID_Utilisateur=id_utilisateur, ID_Livre=id_livre)
@@ -387,6 +408,8 @@ def ajouter_favori(id_utilisateur: int, id_livre: int, db: Session = Depends(get
     db.commit()
     return {"message": "Ajouté aux favoris"}
 
+
+# Récupère la liste des livres favoris d’un utilisateur
 @app.get("/favoris/{id_utilisateur}", response_model=List[dict])
 def get_favoris(id_utilisateur: int, db: Session = Depends(get_db)):
     favoris = (
@@ -405,6 +428,8 @@ def get_favoris(id_utilisateur: int, db: Session = Depends(get_db)):
         for _, livre in favoris
     ]
 
+
+# Supprime un livre des favoris d’un utilisateur
 @app.delete("/favoris/{id_utilisateur}/{id_livre}")
 def supprimer_favori(id_utilisateur: int, id_livre: int, db: Session = Depends(get_db)):
     favori = (
@@ -418,9 +443,14 @@ def supprimer_favori(id_utilisateur: int, id_livre: int, db: Session = Depends(g
     db.commit()
     return {"message": "Retiré des favoris"}
 
+
+# ------------------------
+# Statistiques & Profil IA
+# ------------------------
+
+# Renvoie le nombre total d’interactions et de livres différents lus par un utilisateur
 @app.get("/utilisateurs/{id_utilisateur}/stats")
 def get_stats_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
-    from sqlalchemy import func
     total_interactions = db.query(func.count()).filter(Interaction.ID_Utilisateur == id_utilisateur).scalar()
     livres_distincts = db.query(func.count(func.distinct(Interaction.ID_Livre))).filter(Interaction.ID_Utilisateur == id_utilisateur).scalar()
     return {
@@ -428,6 +458,8 @@ def get_stats_utilisateur(id_utilisateur: int, db: Session = Depends(get_db)):
         "livres_distincts": livres_distincts,
     }
 
+
+# Génère un profil littéraire personnalisé à partir des descriptions de l’utilisateur
 @app.get("/utilisateurs/{id_utilisateur}/profil_ia")
 def get_profil_litteraire(id_utilisateur: int, db: Session = Depends(get_db)):
     interactions = (
@@ -443,6 +475,7 @@ def get_profil_litteraire(id_utilisateur: int, db: Session = Depends(get_db)):
     return {"profil": generer_profil_litteraire(descriptions)}
 
 
+# Analyse les mots les plus récurrents dans les descriptions d’un utilisateur pour déduire son profil émotionnel
 @app.get("/utilisateurs/{id_utilisateur}/profil_emotionnel")
 def get_profil_emotionnel(id_utilisateur: int, db: Session = Depends(get_db)):
     user = db.query(Utilisateur).filter(Utilisateur.ID_Utilisateur == id_utilisateur).first()
@@ -477,6 +510,7 @@ def get_profil_emotionnel(id_utilisateur: int, db: Session = Depends(get_db)):
     }
 
 
+# Compare les profils émotionnels de deux utilisateurs et calcule un score de compatibilité
 @app.get("/utilisateurs/{id_utilisateur}/compatibilite_emotionnelle/{autre_id}")
 def get_compatibilite_emotionnelle(id_utilisateur: int, autre_id: int, db: Session = Depends(get_db)):
     def extraire_top_mots(uid: int, top_n=15):
@@ -509,6 +543,11 @@ def get_compatibilite_emotionnelle(id_utilisateur: int, autre_id: int, db: Sessi
     }
 
 
+# ------------------------
+# 👥 Cercle de lecture (réseau social)
+# ------------------------
+
+# Ajoute un utilisateur au cercle (amis) d’un autre utilisateur
 @app.post("/cercle/{id_utilisateur}/ajouter/{id_membre}")
 def ajouter_au_cercle(id_utilisateur: int, id_membre: int, db: Session = Depends(get_db)):
     if id_utilisateur == id_membre:
@@ -524,6 +563,7 @@ def ajouter_au_cercle(id_utilisateur: int, id_membre: int, db: Session = Depends
     return {"message": "Ajouté au cercle avec succès."}
 
 
+# Récupère la liste des membres du cercle d’un utilisateur
 @app.get("/cercle/{id_utilisateur}")
 def get_cercle(id_utilisateur: int, db: Session = Depends(get_db)):
     membres = (
@@ -538,6 +578,7 @@ def get_cercle(id_utilisateur: int, db: Session = Depends(get_db)):
     ]
 
 
+# Retire un utilisateur du cercle d’un autre utilisateur
 @app.delete("/cercle/{id_utilisateur}/retirer/{id_membre}")
 def retirer_du_cercle(id_utilisateur: int, id_membre: int, db: Session = Depends(get_db)):
     lien = db.query(Cercle).filter_by(ID_Utilisateur=id_utilisateur, ID_Membre=id_membre).first()
@@ -547,23 +588,3 @@ def retirer_du_cercle(id_utilisateur: int, id_membre: int, db: Session = Depends
     db.delete(lien)
     db.commit()
     return {"message": "Retiré du cercle."}
-
-
-@app.get("/cercle/{id_utilisateur}")
-def get_cercle(id_utilisateur: int, db: Session = Depends(get_db)):
-    membres = (
-        db.query(Utilisateur)
-        .join(Cercle, Cercle.ID_Membre == Utilisateur.ID_Utilisateur)
-        .filter(Cercle.ID_Utilisateur == id_utilisateur)
-        .all()
-    )
-
-    return [
-        {
-            "id": membre.ID_Utilisateur,
-            "nom": membre.Nom,
-            "email": membre.Email
-        }
-        for membre in membres
-    ]
-
