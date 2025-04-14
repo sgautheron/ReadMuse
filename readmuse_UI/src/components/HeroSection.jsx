@@ -168,34 +168,39 @@ const HeroSection = () => {
           <Grid container spacing={4}>
             {topCommentes.slice(0, 3).map((livre) => (
               <Grid item xs={12} sm={4} key={livre.ID_Livre}>
-                <Box
-                  sx={{
-                    textAlign: "center",
-                    p: 2,
-                    backgroundColor: "#fdfaf3",
-                    borderRadius: 2,
-                    boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
-                    transition: "transform 0.2s ease",
-                    "&:hover": { transform: "scale(1.03)", cursor: "pointer" },
-                  }}
+                <Link
+                  to={`/livre/${livre.ID_Livre}`}
+                  style={{ textDecoration: "none", color: "inherit" }}
                 >
-                  <img
-                    src={livre.URL_Couverture || "/placeholder.jpg"}
-                    alt={livre.Titre}
-                    style={{
-                      width: "35%",
-                      height: "auto",
-                      borderRadius: "8px",
-                      marginBottom: "0.5rem",
+                  <Box
+                    sx={{
+                      textAlign: "center",
+                      p: 2,
+                      backgroundColor: "#fdfaf3",
+                      borderRadius: 2,
+                      boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
+                      transition: "transform 0.2s ease",
+                      "&:hover": { transform: "scale(1.03)", cursor: "pointer" },
                     }}
-                  />
-                  <Typography variant="subtitle1" fontWeight="bold" noWrap>
-                    {livre.Titre}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" noWrap>
-                    {livre.Auteur}
-                  </Typography>
-                </Box>
+                  >
+                    <img
+                      src={livre.URL_Couverture || "/placeholder.jpg"}
+                      alt={livre.Titre}
+                      style={{
+                        width: "35%",
+                        height: "auto",
+                        borderRadius: "8px",
+                        marginBottom: "0.5rem",
+                      }}
+                    />
+                    <Typography variant="subtitle1" fontWeight="bold" noWrap>
+                      {livre.Titre}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" noWrap>
+                      {livre.Auteur}
+                    </Typography>
+                  </Box>
+                </Link>
               </Grid>
             ))}
           </Grid>

@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { useUser } from "../context/UserContext";
+import { useNavigate } from "react-router-dom";
 
 const ProfilPublic = () => {
   const { id } = useParams();
@@ -22,6 +23,7 @@ const ProfilPublic = () => {
   const [compatibilite, setCompatibilite] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState(null);
+  const navigate = useNavigate();
 
   const pastelColors = [
     "#ffe5ec",
@@ -158,10 +160,16 @@ const ProfilPublic = () => {
           <Chip
             key={index}
             label={mot}
+            onClick={() => navigate(`/motcle/${encodeURIComponent(mot)}`)}
+            clickable
             sx={{
               backgroundColor: getColor(mot),
               fontWeight: "bold",
               textTransform: "capitalize",
+              cursor: "pointer",
+              "&:hover": {
+                opacity: 0.9,
+              },
             }}
           />
         ))}

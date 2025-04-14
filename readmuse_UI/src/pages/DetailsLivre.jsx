@@ -89,7 +89,7 @@ const DétailsLivre = () => {
 
   return (
     <>
-      <Box sx={{ position: "absolute", top: 80, left: 50 }}>
+      <Box sx={{ position: "absolute", top: 120, left: 80 }}>
         <IconButton onClick={() => navigate("/exploration-emo")} color="primary">
           <ArrowBackIcon />
         </IconButton>

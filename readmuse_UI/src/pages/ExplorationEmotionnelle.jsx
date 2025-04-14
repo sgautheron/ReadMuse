@@ -118,21 +118,22 @@ function ExplorationEmotionnelle() {
                     }}
                   >
                     {livre.Titre}
-                    <Typography
-                      variant="caption"
-                      color="text.secondary"
-                      sx={{
-                        fontSize: 12,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 1,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        textAlign: "left",
-                      }}
-                    >
-                      {livre.Auteur}
-                    </Typography>
+                  </Typography>
+
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{
+                      fontSize: 12,
+                      display: "-webkit-box",
+                      WebkitLineClamp: 1,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      textAlign: "left",
+                    }}
+                  >
+                    {livre.Auteur}
                   </Typography>
                 </Box>
               ))}
@@ -162,10 +163,35 @@ function ExplorationEmotionnelle() {
                     onClick={() => navigate(`/livre/${livre.ID_Livre}`)}
                   >
                     {renderBookImage(livre)}
-                    <Typography variant="subtitle2" noWrap>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{
+                        fontWeight: "bold",
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        fontSize: 14,
+                        textAlign: "left",
+                      }}
+                    >
                       {livre.Titre}
                     </Typography>
-                    <Typography variant="caption" color="text.secondary" noWrap>
+
+                    <Typography
+                      variant="caption"
+                      color="text.secondary"
+                      sx={{
+                        fontSize: 12,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 1,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        textAlign: "left",
+                      }}
+                    >
                       {livre.Auteur}
                     </Typography>
                   </Box>

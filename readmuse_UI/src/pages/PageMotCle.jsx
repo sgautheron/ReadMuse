@@ -73,7 +73,7 @@ const PageMotCle = () => {
         <Typography color="error">{erreur}</Typography>
       ) : loading ? (
         <Typography textAlign="center" sx={{ mt: 4 }}>
-          ⏳ On fouille les avis à la recherche de ce mot...
+          On fouille les avis à la recherche de ce mot...
         </Typography>
       ) : livres.length === 0 ? (
         <Box sx={{ mt: 4 }}>
